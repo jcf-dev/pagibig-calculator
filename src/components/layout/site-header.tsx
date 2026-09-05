@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LogoMark } from "@/components/common/logo-mark";
 import { ModeToggle } from "@/components/common/mode-toggle";
+import { LABS_URL } from "@/config/site";
 
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = React.useState(false);
@@ -26,9 +26,10 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="https://joween.dev" className="flex items-center">
+        <a href={LABS_URL} className="flex items-center gap-2" aria-label="Back to Joween Labs">
           <LogoMark />
-        </Link>
+          <span className="hidden text-sm text-muted-foreground sm:inline">Back to Labs</span>
+        </a>
 
         <ModeToggle />
       </div>

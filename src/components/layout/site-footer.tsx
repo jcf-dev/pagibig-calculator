@@ -3,6 +3,7 @@ import { Bot, Heart, Mail, Send } from "lucide-react";
 import { ModeToggle } from "@/components/common/mode-toggle";
 import { UpworkIcon } from "@/components/icons/upwork-icon";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
+import { LABS_URL } from "@/config/site";
 
 export function SiteFooter() {
   return (
@@ -22,14 +23,12 @@ export function SiteFooter() {
           <div>
             <span>&copy; {new Date().getFullYear()} Joween Flores</span>
             <span className="mx-2">|</span>
-            <Link
-              href="https://joween.dev"
-              target="_blank"
-              rel="noopener noreferrer"
+            <a
+              href={LABS_URL}
               className="transition-colors hover:text-foreground hover:underline"
             >
-              joween.dev
-            </Link>
+              Joween Labs
+            </a>
           </div>
         </div>
 

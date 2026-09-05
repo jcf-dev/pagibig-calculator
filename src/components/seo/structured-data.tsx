@@ -1,4 +1,4 @@
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://joween.dev";
+import { LAB_URL } from "@/config/site";
 
 export function StructuredData() {
   const data = {
@@ -7,7 +7,7 @@ export function StructuredData() {
     name: "Pag-IBIG Housing Loan Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    url: siteUrl,
+    url: LAB_URL,
     description:
       "Estimate Pag-IBIG housing loan payments, refinancing break-even, extra principal savings, future rate changes, interest-only periods, and loan costs.",
     creator: {

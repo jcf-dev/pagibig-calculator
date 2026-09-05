@@ -38,6 +38,8 @@ import {
 import {
   DEFAULT_LOAN_CEILING,
   DEFAULT_RATE_OPTIONS,
+  RATE_ASSUMPTIONS_EFFECTIVE_DATE,
+  RATE_ASSUMPTIONS_REVIEWED_DATE,
   RATE_SOURCES,
 } from "@/lib/rates";
 import { cn, formatNumber, formatPeso } from "@/lib/utils";
@@ -411,7 +413,9 @@ export function PagibigCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle>Rates and assumptions</CardTitle>
-                  <CardDescription>Defaults are editable because official rates and eligibility can change.</CardDescription>
+                  <CardDescription>
+                    Defaults are editable because official rates, promotional terms, and eligibility can change.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
@@ -429,7 +433,10 @@ export function PagibigCalculator() {
                     </div>
                   </div>
                   <div className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
-                    <p className="mb-2 font-medium text-foreground">Reference links used for seed assumptions</p>
+                    <p className="font-medium text-foreground">Reference links used for seed assumptions</p>
+                    <p className="mb-3 mt-1">
+                      Standard fixing-period defaults reflect the schedule effective {RATE_ASSUMPTIONS_EFFECTIVE_DATE} and were reviewed {RATE_ASSUMPTIONS_REVIEWED_DATE}. Current promotional rates are eligibility-dependent and are not applied automatically.
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {RATE_SOURCES.map((source) => (
                         <a key={source.href} href={source.href} target="_blank" rel="noreferrer" className="rounded-md border bg-background px-3 py-1 hover:bg-accent">

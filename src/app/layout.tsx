@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/common/theme-provider";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { StructuredData } from "@/components/seo/structured-data";
+import { LAB_BASE_PATH, SITE_ORIGIN } from "@/config/site";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -23,7 +24,7 @@ const doto = Doto({
   weight: "600",
 });
 
-const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://joween.dev");
+const siteUrl = new URL(SITE_ORIGIN);
 const siteDescription =
   "Estimate Pag-IBIG housing loan payments, refinancing break-even, extra principal savings, future rate changes, interest-only periods, and loan costs.";
 
@@ -49,12 +50,12 @@ export const metadata: Metadata = {
   publisher: "Joween Flores",
   category: "finance",
   alternates: {
-    canonical: "/",
+    canonical: LAB_BASE_PATH,
   },
   openGraph: {
     title: "Pag-IBIG Housing Loan Calculator",
     description: siteDescription,
-    url: "/",
+    url: LAB_BASE_PATH,
     siteName: "Pag-IBIG Housing Loan Calculator",
     locale: "en_PH",
     type: "website",
