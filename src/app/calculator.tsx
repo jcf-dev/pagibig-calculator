@@ -42,7 +42,7 @@ import {
   RATE_ASSUMPTIONS_REVIEWED_DATE,
   RATE_SOURCES,
 } from "@/lib/rates";
-import { formatMoneyInput, formatNumber, formatPeso, parseMoneyInput } from "@/lib/utils";
+import { formatMoneyInput, formatNumber, formatPeso, formatWholePeso, parseMoneyInput } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1430,7 +1430,7 @@ function AnnualSummaryTable({
           <div>
             <CardTitle>Annual summary</CardTitle>
             <CardDescription>
-              Totals grouped by calendar year. {description}
+              Totals grouped by calendar year. {description} Page values are rounded to whole pesos.
             </CardDescription>
           </div>
           {onExpand ? (
@@ -1460,32 +1460,55 @@ function AnnualSummaryTable({
           ))}
         </div>
         <div className="hidden sm:block">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Year</TableHead>
-                <TableHead className="text-right">Payment</TableHead>
-                <TableHead className="text-right">Principal</TableHead>
-                <TableHead className="text-right">Interest</TableHead>
-                <TableHead className="text-right">Costs</TableHead>
-                <TableHead className="text-right">Outflow</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleRows.map((row) => (
-                <TableRow key={row.year}>
-                  <TableCell>{row.year}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.payment)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.principal)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.interest)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.endingBalance)}</TableCell>
+          {expanded ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Year</TableHead>
+                  <TableHead className="text-right">Payment</TableHead>
+                  <TableHead className="text-right">Principal</TableHead>
+                  <TableHead className="text-right">Interest</TableHead>
+                  <TableHead className="text-right">Costs</TableHead>
+                  <TableHead className="text-right">Outflow</TableHead>
+                  <TableHead className="text-right">Balance</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {visibleRows.map((row) => (
+                  <TableRow key={row.year}>
+                    <TableCell>{row.year}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.payment)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.principal)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.interest)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.endingBalance)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Table className="table-fixed text-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-14 px-2">Year</TableHead>
+                  <TableHead className="px-2 text-right">Paid</TableHead>
+                  <TableHead className="px-2 text-right">Interest</TableHead>
+                  <TableHead className="px-2 text-right">Balance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleRows.map((row) => (
+                  <TableRow key={row.year}>
+                    <TableCell className="px-2 py-2">{row.year}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.payment)}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.interest)}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.endingBalance)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -1513,7 +1536,7 @@ function PaymentScheduleTable({
           <div>
             <CardTitle>Monthly payments</CardTitle>
             <CardDescription>
-              Scheduled payment, extra principal, costs, and total outflow. {description}
+              Scheduled payment, extra principal, costs, and total outflow. {description} Page values are rounded to whole pesos.
             </CardDescription>
           </div>
           {onExpand ? (
@@ -1552,32 +1575,57 @@ function PaymentScheduleTable({
           ))}
         </div>
         <div className="hidden sm:block">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Month</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Rate</TableHead>
-                <TableHead className="text-right">Scheduled</TableHead>
-                <TableHead className="text-right">Extra</TableHead>
-                <TableHead className="text-right">Costs</TableHead>
-                <TableHead className="text-right">Outflow</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleRows.map((row) => (
-                <TableRow key={`${row.month}-payment`}>
-                  <TableCell>{row.month}</TableCell>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell className="text-right">{formatNumber(row.annualRate)}%</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.scheduledPayment)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.extraPrincipal)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
-                  <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+          {expanded ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Month</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                  <TableHead className="text-right">Scheduled</TableHead>
+                  <TableHead className="text-right">Extra</TableHead>
+                  <TableHead className="text-right">Costs</TableHead>
+                  <TableHead className="text-right">Outflow</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {visibleRows.map((row) => (
+                  <TableRow key={`${row.month}-payment`}>
+                    <TableCell>{row.month}</TableCell>
+                    <TableCell>{row.date}</TableCell>
+                    <TableCell className="text-right">{formatNumber(row.annualRate)}%</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.scheduledPayment)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.extraPrincipal)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
+                    <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Table className="table-fixed text-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12 px-2">Mo.</TableHead>
+                  <TableHead className="w-20 px-2">Date</TableHead>
+                  <TableHead className="px-2 text-right">Scheduled</TableHead>
+                  <TableHead className="px-2 text-right">Extra</TableHead>
+                  <TableHead className="px-2 text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleRows.map((row) => (
+                  <TableRow key={`${row.month}-payment`}>
+                    <TableCell className="px-2 py-2">{row.month}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2">{row.date}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.scheduledPayment)}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.extraPrincipal)}</TableCell>
+                    <TableCell className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatWholePeso(row.totalOutflow)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </CardContent>
     </Card>

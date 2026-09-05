@@ -14,6 +14,8 @@ try {
   for (const size of [
     { name: "desktop", width: 1440, height: 1000, colorScheme: "light" },
     { name: "user-1567", width: 1567, height: 908, colorScheme: "dark" },
+    { name: "advanced-1024", width: 1024, height: 900, colorScheme: "dark" },
+    { name: "tablet-640", width: 640, height: 900, colorScheme: "dark" },
     { name: "mobile", width: 390, height: 844, colorScheme: "dark" },
   ]) {
     const context = await browser.newContext({
@@ -38,6 +40,28 @@ try {
       assert.ok(
         dimensions.scroll <= dimensions.width + 1,
         "Page must not scroll sideways: " + name,
+      );
+    }
+    async function checkScheduleTab(tabName, headingName) {
+      await page.getByRole("tab", { name: tabName, exact: true }).click();
+      const card = page
+        .getByRole("heading", { name: headingName, exact: true })
+        .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')][1]");
+      const layout = await card.evaluate((element) => ({
+        hasMobileCards:
+          element.querySelector("[data-mobile-schedule]")?.checkVisibility() ??
+          false,
+        wideVisibleAreas: [...element.querySelectorAll(".overflow-auto")]
+          .filter((area) => area.checkVisibility())
+          .filter((area) => area.scrollWidth > area.clientWidth + 1).length,
+      }));
+      if (size.width < 640) {
+        assert.ok(layout.hasMobileCards, tabName + " must use cards on a phone");
+      }
+      assert.equal(
+        layout.wideVisibleAreas,
+        0,
+        tabName + " must fit without sideways drag",
       );
     }
     await page.goto(baseURL);
@@ -131,35 +155,9 @@ try {
       path: path.join(output, size.name + "-graph-dialog.png"),
     });
     await button("Close expanded view").click();
-    if (size.width < 640) {
-      for (const [tabName, headingName] of [
-        ["Annual", "Annual summary"],
-        ["Payments", "Monthly payments"],
-      ]) {
-        await page.getByRole("tab", { name: tabName, exact: true }).click();
-        const card = page
-          .getByRole("heading", { name: headingName, exact: true })
-          .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')][1]");
-        const mobileLayout = await card.evaluate((element) => ({
-          hasMobileCards:
-            element.querySelector("[data-mobile-schedule]")?.checkVisibility() ??
-            false,
-          wideVisibleAreas: [...element.querySelectorAll(".overflow-auto")]
-            .filter((area) => area.checkVisibility())
-            .filter((area) => area.scrollWidth > area.clientWidth + 1).length,
-        }));
-        assert.ok(
-          mobileLayout.hasMobileCards,
-          tabName + " must use cards on a phone",
-        );
-        assert.equal(
-          mobileLayout.wideVisibleAreas,
-          0,
-          tabName + " must not need sideways drag on a phone",
-        );
-      }
-      await page.getByRole("tab", { name: "Monthly", exact: true }).click();
-    }
+    await checkScheduleTab("Annual", "Annual summary");
+    await checkScheduleTab("Payments", "Monthly payments");
+    await page.getByRole("tab", { name: "Monthly", exact: true }).click();
     await button("Expand schedule").click();
     await page
       .getByRole("dialog")
@@ -211,6 +209,8 @@ try {
         "Mobile assumptions must start closed",
       );
     }
+    await checkScheduleTab("Annual", "Annual summary");
+    await checkScheduleTab("Payments", "Monthly payments");
     await shot("advanced");
     await page.getByRole("tab", { name: "Rates", exact: true }).click();
     await page

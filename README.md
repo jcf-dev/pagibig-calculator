@@ -16,7 +16,7 @@ Use **Try an example** if you do not have your figures. Sample fields remain mar
 
 Advanced mode keeps the complete calculator, including future rates, costs, interest-only periods, custom payment ranges, and solving for a term or rate. Both modes share values. Simple mode shows active Advanced settings and links back to edit them.
 
-Money fields show the peso mark on the left and group thousands with commas. Result graphs and payment schedules can open in a large view. Monthly, Annual, and Payments use short card previews on a phone, so they do not need a sideways drag.
+Money fields show the peso mark on the left and group thousands with commas. Result graphs and payment schedules can open in a large view. Monthly, Annual, and Payments use short card previews on a phone. Wider screens use a small key-column table with whole-peso values. The large view keeps all columns and cents.
 
 ## What an estimate means
 

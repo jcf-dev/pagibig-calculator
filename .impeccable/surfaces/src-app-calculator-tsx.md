@@ -29,6 +29,8 @@ Use short help text beside each input. Keep all values when modes change.
 Put the peso mark on the left of money fields. Group thousands with commas.
 Show active Advanced rules in Simple. Let people edit them in Advanced.
 Keep all phone schedule tabs short. Use cards instead of wide tables.
+Use key columns and whole-peso values in page tables.
+Keep all columns and cents in the large view.
 Open graphs and full schedules in a large dialog.
 
 ## Content and trust

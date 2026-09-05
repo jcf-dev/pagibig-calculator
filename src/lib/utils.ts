@@ -22,6 +22,14 @@ export function formatPeso(value: number) {
   return pesoFormatter.format(Number.isFinite(value) ? value : 0);
 }
 
+export function formatWholePeso(value: number) {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
 export function formatNumber(value: number) {
   return new Intl.NumberFormat("en-PH", {
     maximumFractionDigits: 2,
