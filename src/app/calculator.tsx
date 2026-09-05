@@ -1252,6 +1252,15 @@ function ScheduleViewControls({
   );
 }
 
+function FullScheduleButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button size="sm" onClick={onClick} className="w-full sm:w-fit">
+      <Maximize2 />
+      View full schedule
+    </Button>
+  );
+}
+
 function ScheduleTable({
   rows,
   view,
@@ -1264,7 +1273,6 @@ function ScheduleTable({
   expanded?: boolean;
 }) {
   const chunkSize = 3;
-  const [visibleMonthCount, setVisibleMonthCount] = useState(chunkSize);
   if (view === "annual") {
     return (
       <AnnualSummaryTable
@@ -1286,7 +1294,7 @@ function ScheduleTable({
 
   const boundedVisibleCount = expanded
     ? rows.length
-    : Math.min(visibleMonthCount, rows.length);
+    : Math.min(chunkSize, rows.length);
   const isFullyVisible = boundedVisibleCount >= rows.length;
   const shouldAppendFinalRow =
     rows.length > boundedVisibleCount && rows.at(-1)?.month !== rows[boundedVisibleCount - 1]?.month;
@@ -1296,13 +1304,7 @@ function ScheduleTable({
   ];
   const description = isFullyVisible
     ? "Showing all months."
-    : boundedVisibleCount === chunkSize
-      ? "Showing first 3 months and final payment."
-      : `Showing first ${boundedVisibleCount} months and final payment.`;
-
-  function showNextChunk() {
-    setVisibleMonthCount((count) => Math.min(count + chunkSize, rows.length));
-  }
+    : "Preview only. Showing first 3 months and final payment.";
 
   return (
     <Card>
@@ -1313,10 +1315,7 @@ function ScheduleTable({
             <CardDescription>{description}</CardDescription>
           </div>
           {onExpand && !expanded ? (
-            <Button variant="outline" size="sm" onClick={onExpand}>
-              <Maximize2 />
-              Expand schedule
-            </Button>
+            <FullScheduleButton onClick={onExpand} />
           ) : null}
         </div>
         <div className="mt-3 flex gap-2 rounded-md border bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
@@ -1376,33 +1375,6 @@ function ScheduleTable({
             </TableBody>
           </Table>
         </div>
-        {!expanded && rows.length > chunkSize ? (
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            {!isFullyVisible ? (
-              <>
-                <Button variant="outline" onClick={showNextChunk} className="w-full sm:w-fit">
-                  Show next 3 months
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setVisibleMonthCount(rows.length)}
-                  className="w-full sm:w-fit"
-                >
-                  Show all
-                </Button>
-              </>
-            ) : null}
-            {boundedVisibleCount > chunkSize ? (
-              <Button
-                variant="ghost"
-                onClick={() => setVisibleMonthCount(chunkSize)}
-                className="w-full sm:w-fit"
-              >
-                Collapse to first 3
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
       </CardContent>
     </Card>
   );
@@ -1422,7 +1394,7 @@ function AnnualSummaryTable({
   const description =
     expanded || visibleRows.length === summaryRows.length
       ? "Showing all years."
-      : "Showing first 3 years and final year.";
+      : "Preview only. Showing first 3 years and final year.";
   return (
     <Card>
       <CardHeader>
@@ -1434,10 +1406,7 @@ function AnnualSummaryTable({
             </CardDescription>
           </div>
           {onExpand ? (
-            <Button variant="outline" size="sm" onClick={onExpand}>
-              <Maximize2 />
-              Expand schedule
-            </Button>
+            <FullScheduleButton onClick={onExpand} />
           ) : null}
         </div>
       </CardHeader>
@@ -1528,7 +1497,7 @@ function PaymentScheduleTable({
   const description =
     expanded || visibleRows.length === rows.length
       ? "Showing all payments."
-      : "Showing first 3 payments and final payment.";
+      : "Preview only. Showing first 3 payments and final payment.";
   return (
     <Card>
       <CardHeader>
@@ -1540,10 +1509,7 @@ function PaymentScheduleTable({
             </CardDescription>
           </div>
           {onExpand ? (
-            <Button variant="outline" size="sm" onClick={onExpand}>
-              <Maximize2 />
-              Expand schedule
-            </Button>
+            <FullScheduleButton onClick={onExpand} />
           ) : null}
         </div>
       </CardHeader>

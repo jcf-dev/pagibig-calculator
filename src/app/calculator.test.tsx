@@ -198,6 +198,11 @@ describe("guided calculator", () => {
     fireEvent.click(
       screen.getByText("Charts, payment schedule, and export"),
     );
+    expect(screen.getByText(/Preview only/)).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "View full schedule" }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Show all" })).toBeNull();
 
     click("Expand graph");
     expect(screen.getByRole("dialog")).toBeTruthy();
@@ -208,7 +213,7 @@ describe("guided calculator", () => {
     ).toBeTruthy();
     click("Close expanded view");
 
-    click("Expand schedule");
+    click("View full schedule");
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(
       screen.getByRole("heading", { name: "Amortization schedule" }),

@@ -158,7 +158,7 @@ try {
     await checkScheduleTab("Annual", "Annual summary");
     await checkScheduleTab("Payments", "Monthly payments");
     await page.getByRole("tab", { name: "Monthly", exact: true }).click();
-    await button("Expand schedule").click();
+    await button("View full schedule").click();
     await page
       .getByRole("dialog")
       .getByRole("heading", { name: "Amortization schedule", exact: true })

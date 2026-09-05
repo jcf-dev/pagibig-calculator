@@ -31,6 +31,8 @@ Show active Advanced rules in Simple. Let people edit them in Advanced.
 Keep all phone schedule tabs short. Use cards instead of wide tables.
 Use key columns and whole-peso values in page tables.
 Keep all columns and cents in the large view.
+Mark the page rows as a preview.
+Use one solid View full schedule action for every schedule tab.
 Open graphs and full schedules in a large dialog.
 
 ## Content and trust

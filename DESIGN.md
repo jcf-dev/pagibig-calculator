@@ -213,6 +213,8 @@ Result rows wrap when their labels and values need more room.
 On small screens, Advanced estimate notes start closed.
 Schedule tabs use short previews and phone cards.
 The page shows three early rows and the final row.
+The preview label states this limit.
+The solid View full schedule button opens every row in the dialog.
 Preview tables keep only key columns and round values to whole pesos.
 Expanded tables keep all columns and cents.
 Large graph and schedule views stay inside a scrollable dialog.
@@ -300,6 +302,7 @@ Loan comparisons use a table with right-aligned numbers.
 Notes state what the estimate includes.
 Charts, schedules, and export remain in an expandable report section.
 Graphs and full schedules open in a large dialog with a clear close button.
+The View full schedule action uses the main button style.
 Annual and Payments use stacked cards instead of wide tables on small screens.
 Their page tables use compact cells and fewer columns.
 
