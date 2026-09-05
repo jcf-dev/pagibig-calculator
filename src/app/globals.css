@@ -152,3 +152,44 @@ input,
 select {
   letter-spacing: 0;
 }
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+input { caret-color: var(--foreground); }
+button, input, select, summary, a { scroll-margin-top: 5rem; }
+button:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+.guided-calculator h2 { scroll-margin-top: 5rem; }
+.guided-calculator input { font-variant-numeric: tabular-nums; }
+.guided-calculator summary::marker { color: var(--muted-foreground); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  :root, .dark {
+    --background: white;
+    --foreground: black;
+    --card: white;
+    --card-foreground: black;
+    --muted-foreground: #444;
+    --border: #ccc;
+  }
+  header, footer, .calculator-controls, .guide-help, button, [role="tablist"] {
+    display: none !important;
+  }
+  .guided-calculator { max-width: none; }
+  .guided-calculator > .grid { display: block; }
+  .report-details > div { display: block; }
+  .estimate-notes { break-inside: avoid; }
+}

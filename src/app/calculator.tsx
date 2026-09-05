@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState, type SetStateAction } from "react";
 import {
   Calculator,
   Download,
@@ -28,7 +28,6 @@ import {
   compareRefinance,
   rowsToCsv,
   type CostRule,
-  type ExtraPaymentMode,
   type ExtraPaymentRule,
   type InterestOnlyPeriod,
   type InterestRatePeriod,
@@ -42,7 +41,7 @@ import {
   RATE_ASSUMPTIONS_REVIEWED_DATE,
   RATE_SOURCES,
 } from "@/lib/rates";
-import { cn, formatNumber, formatPeso } from "@/lib/utils";
+import { formatNumber, formatPeso } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,114 +53,51 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-type FinancingState = {
-  principal: number;
-  termYears: number;
-  solveTarget: SolveTarget;
-  targetPayment: number;
-  selectedRateId: string;
-  customRate: number;
-  useCustomRate: boolean;
-  startDate: string;
-  monthlyExtra: number;
-  annualExtra: number;
-  oneTimeMonth: number;
-  oneTimeExtra: number;
-  rangeStartMonth: number;
-  rangeEndMonth: number;
-  rangeExtra: number;
-  extraPaymentMode: ExtraPaymentMode;
-  ratePeriods: InterestRatePeriod[];
-  interestOnlyPeriods: InterestOnlyPeriod[];
-  costs: CostRule[];
-  scheduleView: "monthly" | "annual" | "payments";
-};
-
-type RefinanceState = {
-  currentBalance: number;
-  currentMonthlyDue: number;
-  currentAnnualRate: number;
-  remainingYears: number;
-  newTermYears: number;
-  selectedRateId: string;
-  customRate: number;
-  useCustomRate: boolean;
-  refinanceCosts: number;
-  startDate: string;
-  monthlyExtra: number;
-  extraPaymentMode: ExtraPaymentMode;
-  newRatePeriods: InterestRatePeriod[];
-  newInterestOnlyPeriods: InterestOnlyPeriod[];
-  newCosts: CostRule[];
-  scheduleView: "monthly" | "annual" | "payments";
-};
-
-type StoredState = {
-  rates: RateOption[];
-  loanCeiling: number;
-  financing: FinancingState;
-  refinance: RefinanceState;
-};
-
-const today = new Date().toISOString().slice(0, 10);
-const STORAGE_KEY = "pagibig-calculator:v1";
-
-const defaultFinancing: FinancingState = {
-  principal: 3_500_000,
-  termYears: 30,
-  solveTarget: "payment",
-  targetPayment: 25_000,
-  selectedRateId: "fixing-5",
-  customRate: 6.5,
-  useCustomRate: false,
-  startDate: today,
-  monthlyExtra: 5_000,
-  annualExtra: 0,
-  oneTimeMonth: 24,
-  oneTimeExtra: 0,
-  rangeStartMonth: 13,
-  rangeEndMonth: 36,
-  rangeExtra: 0,
-  extraPaymentMode: "reduce-term",
-  ratePeriods: [],
-  interestOnlyPeriods: [],
-  costs: [],
-  scheduleView: "monthly",
-};
-
-const defaultRefinance: RefinanceState = {
-  currentBalance: 3_000_000,
-  currentMonthlyDue: 28_000,
-  currentAnnualRate: 8.5,
-  remainingYears: 20,
-  newTermYears: 25,
-  selectedRateId: "fixing-5",
-  customRate: 6.5,
-  useCustomRate: false,
-  refinanceCosts: 75_000,
-  startDate: today,
-  monthlyExtra: 0,
-  extraPaymentMode: "reduce-term",
-  newRatePeriods: [],
-  newInterestOnlyPeriods: [],
-  newCosts: [],
-  scheduleView: "monthly",
-};
+import { defaultFinancing, defaultRefinance, defaultGuide, readStoredState, STORAGE_KEY, resolveRate, buildExtraRules, validateScenario, stepsFor, type FinancingState, type RefinanceState, type StoredState, type GuideState } from "@/lib/calculator-state";
+import { SimpleCalculator, EstimateNotes } from "@/components/calculator/simple-calculator";
+import { activeSamples } from "@/lib/calculator-state";
 
 export function PagibigCalculator() {
   const [rates, setRates] = useState(DEFAULT_RATE_OPTIONS);
   const [loanCeiling, setLoanCeiling] = useState(DEFAULT_LOAN_CEILING);
-  const [financing, setFinancing] = useState(defaultFinancing);
-  const [refinance, setRefinance] = useState(defaultRefinance);
+  const [financing, storeFinancing] = useState(defaultFinancing);
+  const [refinance, storeRefinance] = useState(defaultRefinance);
+  const [guide, setGuide] = useState<GuideState>(defaultGuide);
+  const [storageNotice, setStorageNotice] = useState("");
   const [hydrated, setHydrated] = useState(false);
+
+  function invalidate(next: FinancingState | RefinanceState, previous: FinancingState | RefinanceState, task: "financing" | "refinance") {
+    const changed = Object.keys(next).filter((key) => key !== "scheduleView" && !Object.is(next[key as keyof typeof next], previous[key as keyof typeof previous]));
+    if (changed.length) setGuide((g) => ({ ...g,
+      step: Math.min(g.step, stepsFor(g.task).length - 2),
+      samples: g.samples.filter((key) => !changed.some((field) => key === `${task}.${field}`)),
+    }));
+  }
+  function setFinancing(action: SetStateAction<FinancingState>) {
+    const next = typeof action === "function" ? action(financing) : action;
+    invalidate(next, financing, "financing");
+    storeFinancing(next);
+  }
+  function setRefinance(action: SetStateAction<RefinanceState>) {
+    const next = typeof action === "function" ? action(refinance) : action;
+    invalidate(next, refinance, "refinance");
+    storeRefinance(next);
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const stored = readStoredState();
+      let stored: StoredState;
+      try {
+        stored = readStoredState(window.localStorage);
+      } catch {
+        stored = { rates: DEFAULT_RATE_OPTIONS, loanCeiling: DEFAULT_LOAN_CEILING, financing: defaultFinancing, refinance: defaultRefinance, guide: defaultGuide };
+        setStorageNotice("This browser cannot save your inputs. You can still use the calculator.");
+      }
       setRates(stored.rates);
       setLoanCeiling(stored.loanCeiling);
-      setFinancing(stored.financing);
-      setRefinance(stored.refinance);
+      storeFinancing(stored.financing);
+      storeRefinance(stored.refinance);
+      setGuide(stored.guide);
       setHydrated(true);
     }, 0);
 
@@ -170,24 +106,37 @@ export function PagibigCalculator() {
 
   useEffect(() => {
     if (!hydrated) return;
-    const state: StoredState = { rates, loanCeiling, financing, refinance };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [financing, hydrated, loanCeiling, refinance, rates]);
+    const state: StoredState = { rates, loanCeiling, financing, refinance, guide };
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      const timer = window.setTimeout(() => setStorageNotice("This browser cannot save your inputs. Keep this page open while you work."), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, [financing, hydrated, loanCeiling, refinance, rates, guide]);
+
+  useEffect(() => {
+    let opened: HTMLDetailsElement[] = [];
+    const before = () => {
+      opened = Array.from(document.querySelectorAll<HTMLDetailsElement>("main details:not([open])"));
+      opened.forEach((element) => { element.open = true; });
+    };
+    const after = () => { opened.forEach((element) => { element.open = false; }); opened = []; };
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => { window.removeEventListener("beforeprint", before); window.removeEventListener("afterprint", after); };
+  }, []);
 
   const financingRate = resolveRate(rates, financing.selectedRateId, financing.customRate, financing.useCustomRate);
   const refinanceRate = resolveRate(rates, refinance.selectedRateId, refinance.customRate, refinance.useCustomRate);
 
   const financingRules = useMemo(() => buildFinancingRules(financing), [financing]);
-  const refinanceRules = useMemo<ExtraPaymentRule[]>(
-    () =>
-      refinance.monthlyExtra > 0
-        ? [{ type: "monthly", amount: refinance.monthlyExtra, startMonth: 1 }]
-        : [],
-    [refinance.monthlyExtra],
-  );
+  const refinanceRules = useMemo(() => buildExtraRules(refinance), [refinance]);
 
   const financingResult = useMemo(() => {
     try {
+      const errors = validateScenario("financing", financing, defaultRefinance, rates, loanCeiling);
+      if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
       return {
         error: "",
         data: calculateAmortization({
@@ -207,11 +156,11 @@ export function PagibigCalculator() {
     } catch (error) {
       return { error: error instanceof Error ? error.message : "Unable to calculate.", data: null };
     }
-  }, [financing, financingRate, financingRules]);
+  }, [financing, financingRate, financingRules, rates, loanCeiling]);
 
   const baseFinancingResult = useMemo(
-    () =>
-      calculateAmortization({
+    () => {
+      try { return calculateAmortization({
         principal: financing.principal,
         annualRate: financingRate,
         termMonths: financing.termYears * 12,
@@ -223,12 +172,15 @@ export function PagibigCalculator() {
         costs: financing.costs,
         solveTarget: financing.solveTarget,
         targetPayment: financing.targetPayment,
-      }),
+      }); } catch { return null; }
+    },
     [financing, financingRate],
   );
 
   const refinanceComparison = useMemo(() => {
     try {
+      const errors = validateScenario("refinance", defaultFinancing, refinance, rates, loanCeiling);
+      if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
       return {
         error: "",
         data: compareRefinance({
@@ -239,6 +191,7 @@ export function PagibigCalculator() {
           newAnnualRate: refinanceRate,
           newTermMonths: refinance.newTermYears * 12,
           refinanceCosts: refinance.refinanceCosts,
+          feeTreatment: refinance.feeTreatment,
           startDate: refinance.startDate,
           extraPayments: refinanceRules,
           extraPaymentMode: refinance.extraPaymentMode,
@@ -250,14 +203,27 @@ export function PagibigCalculator() {
     } catch (error) {
       return { error: error instanceof Error ? error.message : "Unable to compare refinance.", data: null };
     }
-  }, [refinance, refinanceRate, refinanceRules]);
+  }, [refinance, refinanceRate, refinanceRules, rates, loanCeiling]);
+
+  const refinanceBaseline = useMemo(() => {
+    try {
+      return calculateAmortization({
+        principal: refinance.currentBalance + (refinance.feeTreatment === "financed" ? refinance.refinanceCosts : 0),
+        annualRate: refinanceRate, termMonths: refinance.newTermYears * 12, startDate: refinance.startDate,
+        extraPayments: [], extraPaymentMode: "reduce-term", ratePeriods: refinance.newRatePeriods,
+        interestOnlyPeriods: refinance.newInterestOnlyPeriods, costs: refinance.newCosts,
+      });
+    } catch { return null; }
+  }, [refinance, refinanceRate]);
 
   function resetAll() {
+    if (!window.confirm("Clear both loan estimates and start again?")) return;
     setRates(DEFAULT_RATE_OPTIONS);
     setLoanCeiling(DEFAULT_LOAN_CEILING);
-    setFinancing(defaultFinancing);
-    setRefinance(defaultRefinance);
-    window.localStorage.removeItem(STORAGE_KEY);
+    storeFinancing(defaultFinancing);
+    storeRefinance(defaultRefinance);
+    setGuide(defaultGuide);
+    try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* The in-memory reset still works. */ }
   }
 
   return (
@@ -272,7 +238,7 @@ export function PagibigCalculator() {
                 </h1>
                 <div className="h-[2px] w-32 bg-gradient-to-r from-brand-rose to-brand-blue" />
                 <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Estimate financing, advance-to-principal savings, and refinance break-even using configurable rates, terms, costs, and payment behavior.
+                  Understand your payments. Explore extra payments. Compare a new loan with the one you have.
                 </p>
                 <p className="max-w-4xl text-xs italic leading-5 text-muted-foreground">
                   Estimates only. This is not financial advice, loan approval, or an official Pag-IBIG computation.
@@ -283,7 +249,18 @@ export function PagibigCalculator() {
         </section>
 
         <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <Tabs defaultValue="financing" className="w-full">
+          <div className="calculator-controls mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex rounded-lg border p-1" role="group" aria-label="Calculator mode">
+              {(["simple", "advanced"] as const).map((mode) => <Button key={mode} variant={guide.mode === mode ? "default" : "ghost"} aria-pressed={guide.mode === mode} onClick={() => setGuide((g) => ({ ...g, mode, step: Math.min(g.step, stepsFor(g.task).length - 2) }))}>{mode === "simple" ? "Simple · step by step" : "Advanced"}</Button>)}
+            </div>
+            <p className="text-xs text-muted-foreground">Your inputs stay with you when you switch.</p>
+          </div>
+          {storageNotice && <p role="status" className="mb-4 rounded-lg border p-3 text-sm">{storageNotice}</p>}
+          {!hydrated ? <p role="status" className="py-12 text-center text-muted-foreground">Getting your calculator ready…</p> : guide.mode === "simple" ? (
+            <SimpleCalculator financing={financing} refinance={refinance} setFinancing={setFinancing} setRefinance={setRefinance} guide={guide} setGuide={setGuide} rates={rates} loanCeiling={loanCeiling} financingResult={financingResult} baseline={guide.task === "financing" ? baseFinancingResult : refinanceBaseline} refinanceComparison={refinanceComparison}
+              details={guide.task === "financing" ? <ResultPanel result={financingResult} baseline={baseFinancingResult} title="Payment schedule" onExport={() => exportCsv("pagibig-financing.csv", financingResult.data?.rows ?? [], reportNotes("financing"))} canRenderChart={hydrated} scheduleView={financing.scheduleView} onScheduleViewChange={(scheduleView) => setFinancing((s) => ({ ...s, scheduleView }))} /> : <RefinancePanel comparison={refinanceComparison} onExport={() => exportCsv("pagibig-refinance.csv", refinanceComparison.data?.refinance.rows ?? [], reportNotes("refinance"))} canRenderChart={hydrated} scheduleView={refinance.scheduleView} onScheduleViewChange={(scheduleView) => setRefinance((s) => ({ ...s, scheduleView }))} />}
+            />
+          ) : <Tabs defaultValue={guide.task} onValueChange={(value) => { if (value !== "rates") setGuide((g) => ({ ...g, task: value as "financing" | "refinance", step: value === g.task ? g.step : 0 })); }} className="w-full">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <TabsList className="grid h-auto w-full grid-cols-3 p-1 sm:w-[620px]">
                 <TabsTrigger value="financing" className="min-w-0 gap-1 px-1.5 text-xs sm:gap-2 sm:px-3 sm:text-sm">
@@ -301,11 +278,12 @@ export function PagibigCalculator() {
               </TabsList>
               <Button variant="outline" onClick={resetAll} className="w-full sm:w-fit">
                 <RotateCcw />
-                Reset defaults
+                Clear all inputs
               </Button>
             </div>
 
             <TabsContent value="financing">
+              <EstimateNotes task="financing" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
               <div className="grid gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
                 <Card>
                   <CardHeader>
@@ -330,7 +308,7 @@ export function PagibigCalculator() {
                               <p className="text-sm font-medium">Reduce monthly due after extras</p>
                               <p className="text-xs text-muted-foreground">Off means extras shorten the term.</p>
                             </div>
-                            <Switch checked={financing.extraPaymentMode === "reduce-payment"} onCheckedChange={(checked) => setFinancing((s) => ({ ...s, extraPaymentMode: checked ? "reduce-payment" : "reduce-term" }))} />
+                            <Switch aria-label="Reduce monthly due after extras" checked={financing.extraPaymentMode === "reduce-payment"} onCheckedChange={(checked) => setFinancing((s) => ({ ...s, extraPaymentMode: checked ? "reduce-payment" : "reduce-term" }))} />
                           </div>
                           <InputGrid>
                             <MoneyField label="Monthly extra" description="Additional principal paid every month from month 1 onward." value={financing.monthlyExtra} onChange={(monthlyExtra) => setFinancing((s) => ({ ...s, monthlyExtra }))} />
@@ -359,7 +337,7 @@ export function PagibigCalculator() {
                   result={financingResult}
                   baseline={baseFinancingResult}
                   title="Financing estimate"
-                  onExport={() => exportCsv("pagibig-financing.csv", financingResult.data?.rows ?? [])}
+                  onExport={() => exportCsv("pagibig-financing.csv", financingResult.data?.rows ?? [], reportNotes("financing"))}
                   canRenderChart={hydrated}
                   scheduleView={financing.scheduleView}
                   onScheduleViewChange={(scheduleView) => setFinancing((s) => ({ ...s, scheduleView }))}
@@ -368,6 +346,7 @@ export function PagibigCalculator() {
             </TabsContent>
 
             <TabsContent value="refinance">
+              <EstimateNotes task="refinance" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
               <div className="grid gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
                 <Card>
                   <CardHeader>
@@ -381,10 +360,15 @@ export function PagibigCalculator() {
                       <NumberField label="Current rate %" description="Annual interest rate of the current loan." value={refinance.currentAnnualRate} step={0.001} onChange={(currentAnnualRate) => setRefinance((s) => ({ ...s, currentAnnualRate }))} />
                       <NumberField label="Remaining years" description="Estimated years left on the current loan." value={refinance.remainingYears} min={1} max={30} onChange={(remainingYears) => setRefinance((s) => ({ ...s, remainingYears }))} />
                       <NumberField label="New term years" description="Term for the new refinance scenario." value={refinance.newTermYears} min={1} max={30} onChange={(newTermYears) => setRefinance((s) => ({ ...s, newTermYears }))} />
-                      <MoneyField label="Refinance costs" description="Fees, taxes, penalties, and other closing costs. This estimate finances them into the new loan." value={refinance.refinanceCosts} onChange={(refinanceCosts) => setRefinance((s) => ({ ...s, refinanceCosts }))} />
+                      <MoneyField label="Refinance costs" description="Fees, taxes, penalties, and other closing costs. Choose how to pay them below." value={refinance.refinanceCosts} onChange={(refinanceCosts) => setRefinance((s) => ({ ...s, refinanceCosts }))} />
+                      <label className="space-y-2 text-sm">How to pay fees<select className="h-11 w-full rounded-md border bg-background px-3" value={refinance.feeTreatment} onChange={(e) => setRefinance((s) => ({ ...s, feeTreatment: e.target.value as RefinanceState["feeTreatment"] }))}><option value="financed">Add to the new loan</option><option value="upfront">Pay now</option></select></label>
                       <DateField label="Start date" description="First month used for both current and refinance schedules." value={refinance.startDate} onChange={(startDate) => setRefinance((s) => ({ ...s, startDate }))} />
                       <RatePicker description="Annual interest rate used for the new Pag-IBIG refinance estimate." rates={rates} selectedRateId={refinance.selectedRateId} customRate={refinance.customRate} useCustomRate={refinance.useCustomRate} onChange={(patch) => setRefinance((s) => ({ ...s, ...patch }))} />
                       <MoneyField label="New monthly extra" description="Additional principal paid monthly on the new refinance loan." value={refinance.monthlyExtra} onChange={(monthlyExtra) => setRefinance((s) => ({ ...s, monthlyExtra }))} />
+                      <MoneyField label="New yearly extra" description="Extra principal every 12 months, starting in month 12." value={refinance.annualExtra} onChange={(annualExtra) => setRefinance((s) => ({ ...s, annualExtra }))} />
+                      <MoneyField label="New one-time extra" description="Extra principal paid once on the chosen month." value={refinance.oneTimeExtra} onChange={(oneTimeExtra) => setRefinance((s) => ({ ...s, oneTimeExtra }))} />
+                      <NumberField label="New one-time month" min={1} value={refinance.oneTimeMonth} onChange={(oneTimeMonth) => setRefinance((s) => ({ ...s, oneTimeMonth }))} />
+                      <label className="space-y-2 text-sm">Effect of extra payments<select className="h-11 w-full rounded-md border bg-background px-3" value={refinance.extraPaymentMode} onChange={(e) => setRefinance((s) => ({ ...s, extraPaymentMode: e.target.value as RefinanceState["extraPaymentMode"] }))}><option value="reduce-term">Pay off sooner</option><option value="reduce-payment">Reduce later payments</option></select></label>
                     </RefinanceInputGrid>
                     <Accordion type="single" collapsible>
                       <AccordionItem value="new-loan-advanced" className="border-t">
@@ -401,7 +385,7 @@ export function PagibigCalculator() {
 
                 <RefinancePanel
                   comparison={refinanceComparison}
-                  onExport={() => exportCsv("pagibig-refinance.csv", refinanceComparison.data?.refinance.rows ?? [])}
+                  onExport={() => exportCsv("pagibig-refinance.csv", refinanceComparison.data?.refinance.rows ?? [], reportNotes("refinance"))}
                   canRenderChart={hydrated}
                   scheduleView={refinance.scheduleView}
                   onScheduleViewChange={(scheduleView) => setRefinance((s) => ({ ...s, scheduleView }))}
@@ -448,40 +432,34 @@ export function PagibigCalculator() {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
+          </Tabs>}
         </div>
 
       </main>
     </TooltipProvider>
   );
-}
 
-function readStoredState(): StoredState {
-  const defaults: StoredState = {
-    rates: DEFAULT_RATE_OPTIONS,
-    loanCeiling: DEFAULT_LOAN_CEILING,
-    financing: defaultFinancing,
-    refinance: defaultRefinance,
-  };
-
-  if (typeof window === "undefined") return defaults;
-
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return defaults;
-
-  try {
-    const parsed = JSON.parse(raw) as Partial<StoredState>;
-    return {
-      rates: parsed.rates ?? defaults.rates,
-      loanCeiling: parsed.loanCeiling ?? defaults.loanCeiling,
-      financing: { ...defaults.financing, ...parsed.financing },
-      refinance: { ...defaults.refinance, ...parsed.refinance },
-    };
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
-    return defaults;
+  function reportNotes(task: "financing" | "refinance") {
+    const state = task === "financing" ? financing : refinance;
+    const result = task === "financing" ? financingResult.data : refinanceComparison.data?.refinance;
+    const inputs = task === "financing" ? {
+      ...financing,
+      principal: financing.solveTarget === "principal" ? undefined : financing.principal,
+      termYears: financing.solveTarget === "term" ? undefined : financing.termYears,
+      customRate: financing.solveTarget === "rate" || !financing.useCustomRate ? undefined : financing.customRate,
+      selectedRateId: financing.solveTarget === "rate" || financing.useCustomRate ? undefined : financing.selectedRateId,
+      targetPayment: financing.solveTarget === "payment" ? undefined : financing.targetPayment,
+    } : state;
+    return [activeSamples(guide.samples, task, financing, refinance).length ? "EXAMPLE: Contains sample values. Replace these before using this estimate." : "Estimate only. Not a loan approval or official computation.",
+      "Only entered fees are included. Future rates may change. Extra payments assume direct payment to principal; confirm lender rules.",
+      `Initial annual rate: ${result?.rows[0]?.annualRate ?? "unavailable"}%. First payment date: ${state.startDate}.`,
+      `Inputs (calculated output fields omitted): ${JSON.stringify(inputs)}`,
+      `Future rates: ${JSON.stringify(task === "financing" ? financing.ratePeriods : refinance.newRatePeriods)}`,
+      `Costs: ${JSON.stringify(task === "financing" ? financing.costs : refinance.newCosts)}`,
+      ...(task === "refinance" ? [`Refinance fees: ${refinance.refinanceCosts}. Treatment: ${refinance.feeTreatment}. Upfront fees are separate from monthly schedule rows. Total including upfront fees: ${refinanceComparison.data?.refinanceTotalOutflow ?? "unavailable"}.`] : [])];
   }
 }
+
 
 function buildFinancingRules(state: FinancingState): ExtraPaymentRule[] {
   const rules: ExtraPaymentRule[] = [];
@@ -499,9 +477,6 @@ function buildFinancingRules(state: FinancingState): ExtraPaymentRule[] {
   return rules;
 }
 
-function resolveRate(rates: RateOption[], id: string, customRate: number, useCustomRate: boolean) {
-  return useCustomRate ? customRate : rates.find((rate) => rate.id === id)?.annualRate ?? customRate;
-}
 
 function InputGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
@@ -532,16 +507,18 @@ function NumberField({
   max?: number;
   step?: number;
 }) {
+  const id = useId();
   return (
     <div className="space-y-2">
-      <FieldLabel label={label} description={description} />
+      <FieldLabel label={label} description={description} htmlFor={id} />
       <Input
+        id={id}
         type="number"
         min={min}
         max={max}
         step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
+        value={Number.isFinite(value) ? value : ""}
+        onChange={(event) => onChange(event.target.value === "" ? NaN : Number(event.target.value))}
       />
     </div>
   );
@@ -549,20 +526,24 @@ function NumberField({
 
 function MoneyField(props: Omit<Parameters<typeof NumberField>[0], "step">) {
   const { label, description, value, onChange, min = 0, max } = props;
+  const id = useId();
+  const invalid = Number.isFinite(value) && (value < min || (max !== undefined && value > max));
 
   return (
     <div className="space-y-2">
-      <FieldLabel label={label} description={description} />
+      <FieldLabel label={label} description={description} htmlFor={id} />
       <Input
+        id={id}
         type="text"
         inputMode="decimal"
+        aria-invalid={invalid}
         value={formatMoneyInput(value)}
         onChange={(event) => {
           const nextValue = parseMoneyInput(event.target.value);
-          const clampedValue = Math.min(Math.max(nextValue, min), max ?? Number.MAX_SAFE_INTEGER);
-          onChange(clampedValue);
+          onChange(nextValue);
         }}
       />
+      {invalid && <p className="text-xs text-destructive">Enter an amount of at least {formatPeso(min)}{max !== undefined ? " and no more than " + formatPeso(max) : ""}.</p>}
     </div>
   );
 }
@@ -575,25 +556,24 @@ function formatMoneyInput(value: number) {
 }
 
 function parseMoneyInput(value: string) {
-  const normalizedValue = value.replace(/[^\d.]/g, "");
-  const [whole = "0", ...decimalParts] = normalizedValue.split(".");
-  const parsed = Number(`${whole}${decimalParts.length ? `.${decimalParts.join("")}` : ""}`);
-  return Number.isFinite(parsed) ? parsed : 0;
+  const normalizedValue = value.replace(/[₱,\s]/g, "");
+  return normalizedValue === "" ? NaN : Number(normalizedValue);
 }
 
 function DateField({ label, description, value, onChange }: { label: string; description?: string; value: string; onChange: (value: string) => void }) {
+  const id = useId();
   return (
     <div className="space-y-2">
-      <FieldLabel label={label} description={description} />
-      <Input type="date" value={value} onChange={(event) => onChange(event.target.value)} />
+      <FieldLabel label={label} description={description} htmlFor={id} />
+      <Input id={id} type="date" value={value} onChange={(event) => onChange(event.target.value)} />
     </div>
   );
 }
 
-function FieldLabel({ label, description }: { label: string; description?: string }) {
+function FieldLabel({ label, description, htmlFor }: { label: string; description?: string; htmlFor?: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <Label>{label}</Label>
+      <Label htmlFor={htmlFor}>{label}</Label>
       {description ? (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -633,14 +613,14 @@ function RatePicker({
         <FieldLabel label="Interest rate" description={description} />
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           Custom
-          <Switch checked={useCustomRate} onCheckedChange={(useCustomRate) => onChange({ useCustomRate })} />
+          <Switch aria-label="Use a custom interest rate" checked={useCustomRate} onCheckedChange={(useCustomRate) => onChange({ useCustomRate })} />
         </div>
       </div>
       {useCustomRate ? (
-        <Input type="number" step="0.001" value={customRate} onChange={(event) => onChange({ customRate: Number(event.target.value) })} />
+        <Input aria-label="Custom annual interest rate" type="number" step="0.001" value={Number.isFinite(customRate) ? customRate : ""} onChange={(event) => onChange({ customRate: event.target.value === "" ? NaN : Number(event.target.value) })} />
       ) : (
         <Select value={selectedRateId} onValueChange={(selectedRateId) => onChange({ selectedRateId })}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Interest rate fixing period">
             <SelectValue placeholder="Select fixing period" />
           </SelectTrigger>
           <SelectContent>
@@ -824,7 +804,7 @@ function InterestOnlyEditor({
   return (
     <AdvancedEditorShell
       title="Interest-only periods"
-      description="Optional periods where the scheduled payment covers interest only, so principal does not reduce unless you add extra principal."
+      description="Optional months that cover interest only. This model pauses all extra principal payments during these months."
     >
       {periods.map((period, index) => (
         <RuleCard key={period.id}>
@@ -979,7 +959,7 @@ function ResultPanel({
   onScheduleViewChange,
 }: {
   result: ReturnType<typeof useMemo<{ error: string; data: ReturnType<typeof calculateAmortization> | null }>>;
-  baseline: ReturnType<typeof calculateAmortization>;
+  baseline: ReturnType<typeof calculateAmortization> | null;
   title: string;
   onExport: () => void;
   canRenderChart: boolean;
@@ -1004,7 +984,7 @@ function ResultPanel({
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label="Payoff" value={`${data.payoffMonth} months`} detail={data.payoffDate} />
-        <Metric label="Saved vs no extras" value={formatPeso(baseline.totalOutflow - data.totalOutflow)} />
+        <Metric label="Saved vs no extras" value={baseline ? formatPeso(baseline.totalOutflow - data.totalOutflow) : "Unavailable"} />
       </div>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
@@ -1066,21 +1046,21 @@ function RefinancePanel({
   const data = comparison.data;
   const chartData = Array.from({ length: Math.max(data.current.rows.length, data.refinance.rows.length) }, (_, index) => ({
     month: index + 1,
-    current: Math.round(data.current.rows[index]?.cumulativePayment ?? data.current.totalPaid),
-    refinance: Math.round(data.refinance.rows[index]?.cumulativePayment ?? data.refinance.totalPaid),
-  })).filter((_, index) => index % 12 === 0 || index === 0);
+    current: Math.round(data.current.rows[index]?.cumulativeOutflow ?? data.current.totalOutflow),
+    refinance: Math.round((data.refinance.rows[index]?.cumulativeOutflow ?? data.refinance.totalOutflow) + data.upfrontCosts),
+  })).filter((_, index, all) => index % 12 === 0 || index === all.length - 1);
 
   return (
     <div className="space-y-4">
-      <Card className={cn("border-l-4", data.recommendation === "refinance" ? "border-l-brand-blue" : data.recommendation === "do-not-refinance" ? "border-l-brand-rose" : "border-l-chart-3")}>
+      <Card>
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <PiggyBank className="size-5" />
-                {data.recommendation === "refinance" ? "Refinance looks better" : data.recommendation === "do-not-refinance" ? "Do not refinance yet" : "Close call"}
+                Compare the two loans
               </CardTitle>
-              <CardDescription className="mt-2">{data.reason}</CardDescription>
+              <CardDescription className="mt-2">The new loan has {data.totalSavings >= 0 ? "lower" : "higher"} total estimated costs by {formatPeso(Math.abs(data.totalSavings))}. Compare the full cost and payoff time, not just the monthly payment.</CardDescription>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="icon" onClick={() => window.print()} aria-label="Print report">
@@ -1097,12 +1077,12 @@ function RefinancePanel({
         <Metric label="New monthly due" value={formatPeso(data.refinance.monthlyPayment)} />
         <Metric label="Monthly savings" value={formatPeso(data.monthlySavings)} />
         <Metric label="Total savings" value={formatPeso(data.totalSavings)} />
-        <Metric label="Break-even" value={data.breakEvenMonth ? `${data.breakEvenMonth} months` : "No break-even"} />
+        <Metric label="Cash-flow crossing" value={data.breakEvenMonth ? `Month ${data.breakEvenMonth}` : "No crossing"} detail="First month cumulative payments are no higher. This may reverse later; it is not guaranteed fee recovery." />
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Current vs refinance cash outflow</CardTitle>
-          <CardDescription>Cumulative payments include financed refinance costs.</CardDescription>
+          <CardDescription>Cumulative payments include entered costs and any fees paid now. Financed fees are repaid with the new loan.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-60 sm:h-72">
@@ -1196,7 +1176,7 @@ function ScheduleTable({
         <div className="mt-3 flex gap-2 rounded-md border bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
           <Info className="mt-0.5 size-3.5 shrink-0 text-foreground/70" />
           <p>
-            This preview assumes the selected interest rate stays constant for all displayed months. After the fixing or repricing period, the actual rate and payment may change.
+            This schedule uses the rates you entered. Actual future rates and payments may differ.
           </p>
         </div>
       </CardHeader>
@@ -1381,9 +1361,10 @@ function ErrorCard({ message }: { message: string }) {
   );
 }
 
-function exportCsv(fileName: string, rows: ReturnType<typeof calculateAmortization>["rows"]) {
+function exportCsv(fileName: string, rows: ReturnType<typeof calculateAmortization>["rows"], notes: string[] = []) {
   if (rows.length === 0) return;
-  const blob = new Blob([rowsToCsv(rows)], { type: "text/csv;charset=utf-8" });
+  const report = notes.map((note) => `"${note.replaceAll('"', '""')}"`).join("\n") + "\n\n" + rowsToCsv(rows);
+  const blob = new Blob([report], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

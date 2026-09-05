@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-05T12:28:53.922Z",
+  "title": "Design System: Pag-IBIG Housing Loan Calculator",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Foreground",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Muted Foreground",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "input": {
+        "role": "neutral",
+        "displayName": "Input",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "ring": {
+        "role": "neutral",
+        "displayName": "Ring",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "destructive": {
+        "role": "secondary",
+        "displayName": "Destructive",
+        "tonalRamp": [
+          "oklch(0.150 0.245 27.325)",
+          "oklch(0.264 0.245 27.325)",
+          "oklch(0.379 0.245 27.325)",
+          "oklch(0.493 0.245 27.325)",
+          "oklch(0.607 0.245 27.325)",
+          "oklch(0.721 0.245 27.325)",
+          "oklch(0.836 0.245 27.325)",
+          "oklch(0.950 0.245 27.325)"
+        ]
+      },
+      "dark-background": {
+        "role": "neutral",
+        "displayName": "Dark Background",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-foreground": {
+        "role": "neutral",
+        "displayName": "Dark Foreground",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-card": {
+        "role": "neutral",
+        "displayName": "Dark Card",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-muted-foreground": {
+        "role": "neutral",
+        "displayName": "Dark Muted Foreground",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-border": {
+        "role": "neutral",
+        "displayName": "Dark Border",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-input": {
+        "role": "neutral",
+        "displayName": "Dark Input",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-ring": {
+        "role": "neutral",
+        "displayName": "Dark Ring",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      },
+      "dark-destructive": {
+        "role": "secondary",
+        "displayName": "Dark Destructive",
+        "tonalRamp": [
+          "oklch(0.150 0.245 27.325)",
+          "oklch(0.264 0.245 27.325)",
+          "oklch(0.379 0.245 27.325)",
+          "oklch(0.493 0.245 27.325)",
+          "oklch(0.607 0.245 27.325)",
+          "oklch(0.721 0.245 27.325)",
+          "oklch(0.836 0.245 27.325)",
+          "oklch(0.950 0.245 27.325)"
+        ]
+      },
+      "brand-rose": {
+        "role": "primary",
+        "displayName": "Brand Rose",
+        "tonalRamp": [
+          "oklch(0.150 0.222 16.935)",
+          "oklch(0.264 0.222 16.935)",
+          "oklch(0.379 0.222 16.935)",
+          "oklch(0.493 0.222 16.935)",
+          "oklch(0.607 0.222 16.935)",
+          "oklch(0.721 0.222 16.935)",
+          "oklch(0.836 0.222 16.935)",
+          "oklch(0.950 0.222 16.935)"
+        ]
+      },
+      "brand-blue": {
+        "role": "primary",
+        "displayName": "Brand Blue",
+        "tonalRamp": [
+          "oklch(0.150 0.243 264.376)",
+          "oklch(0.264 0.243 264.376)",
+          "oklch(0.379 0.243 264.376)",
+          "oklch(0.493 0.243 264.376)",
+          "oklch(0.607 0.243 264.376)",
+          "oklch(0.721 0.243 264.376)",
+          "oklch(0.836 0.243 264.376)",
+          "oklch(0.950 0.243 264.376)"
+        ]
+      },
+      "action-rose": {
+        "role": "primary",
+        "displayName": "Action Rose",
+        "tonalRamp": [
+          "oklch(0.150 0.222 16.935)",
+          "oklch(0.264 0.222 16.935)",
+          "oklch(0.379 0.222 16.935)",
+          "oklch(0.493 0.222 16.935)",
+          "oklch(0.607 0.222 16.935)",
+          "oklch(0.721 0.222 16.935)",
+          "oklch(0.836 0.222 16.935)",
+          "oklch(0.950 0.222 16.935)"
+        ]
+      },
+      "action-blue": {
+        "role": "primary",
+        "displayName": "Action Blue",
+        "tonalRamp": [
+          "oklch(0.150 0.243 264.376)",
+          "oklch(0.264 0.243 264.376)",
+          "oklch(0.379 0.243 264.376)",
+          "oklch(0.493 0.243 264.376)",
+          "oklch(0.607 0.243 264.376)",
+          "oklch(0.721 0.243 264.376)",
+          "oklch(0.836 0.243 264.376)",
+          "oklch(0.950 0.243 264.376)"
+        ]
+      },
+      "action-rose-hover": {
+        "role": "primary",
+        "displayName": "Action Rose Hover",
+        "tonalRamp": [
+          "oklch(0.150 0.222 16.935)",
+          "oklch(0.264 0.222 16.935)",
+          "oklch(0.379 0.222 16.935)",
+          "oklch(0.493 0.222 16.935)",
+          "oklch(0.607 0.222 16.935)",
+          "oklch(0.721 0.222 16.935)",
+          "oklch(0.836 0.222 16.935)",
+          "oklch(0.950 0.222 16.935)"
+        ]
+      },
+      "action-blue-hover": {
+        "role": "primary",
+        "displayName": "Action Blue Hover",
+        "tonalRamp": [
+          "oklch(0.150 0.243 264.376)",
+          "oklch(0.264 0.243 264.376)",
+          "oklch(0.379 0.243 264.376)",
+          "oklch(0.493 0.243 264.376)",
+          "oklch(0.607 0.243 264.376)",
+          "oklch(0.721 0.243 264.376)",
+          "oklch(0.836 0.243 264.376)",
+          "oklch(0.950 0.243 264.376)"
+        ]
+      },
+      "action-text": {
+        "role": "neutral",
+        "displayName": "Action Text",
+        "tonalRamp": [
+          "oklch(0.150 0 0)",
+          "oklch(0.264 0 0)",
+          "oklch(0.379 0 0)",
+          "oklch(0.493 0 0)",
+          "oklch(0.607 0 0)",
+          "oklch(0.721 0 0)",
+          "oklch(0.836 0 0)",
+          "oklch(0.950 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page and step heading",
+        "purpose": "Compact heading size on small screens."
+      },
+      "body": {
+        "displayName": "Help text",
+        "purpose": "Short field help and readable notes."
+      },
+      "label": {
+        "displayName": "Field and button label",
+        "purpose": "Name a control or action."
+      }
+    },
+    "shadows": [
+      {
+        "name": "extra-small",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Outline buttons."
+      },
+      {
+        "name": "small",
+        "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        "purpose": "Primary buttons and active tabs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-duration",
+        "value": "150ms",
+        "purpose": "Normal control state changes."
+      },
+      {
+        "name": "standard-easing",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default transition easing."
+      },
+      {
+        "name": "header-duration",
+        "value": "300ms",
+        "purpose": "Header scroll state changes."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Animation and transition duration when reduced motion is requested; smooth scroll becomes auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "md",
+        "value": "48rem"
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      },
+      {
+        "name": "xl",
+        "value": "80rem"
+      }
+    ],
+    "tonalRampNote": "Ramps are synthesized panel previews. They are not shipped CSS tokens. Frontmatter and globals.css own the actual theme values."
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action and selected calculator mode.",
+      "html": "<button class=\"ds-button\">Start my estimate</button>",
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:linear-gradient(to right,oklch(51.4% .222 16.935),oklch(48.8% .243 264.376));color:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .1),0 1px 2px -1px rgb(0 0 0 / .1)}.ds-button:hover{background:linear-gradient(to right,oklch(45.5% .188 13.697),oklch(42.4% .199 265.638))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+    },
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action such as using an example.",
+      "html": "<button class=\"ds-button\">Try an example</button>",
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid var(--input,oklch(.922 0 0));background:var(--background,#fff);color:var(--foreground,oklch(.145 0 0));box-shadow:0 1px 2px rgb(0 0 0 / .05)}.ds-button:hover{border-color:oklch(64.5% .246 16.439 / .5);background:linear-gradient(to right,oklch(64.5% .246 16.439 / .1),oklch(62.3% .214 259.815 / .1))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Light action such as returning to an earlier step.",
+      "html": "<button class=\"ds-button\">Back</button>",
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:transparent;color:var(--foreground,oklch(.145 0 0))}.ds-button:hover{background:linear-gradient(to right,oklch(64.5% .246 16.439 / .1),oklch(62.3% .214 259.815 / .1))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+    },
+    {
+      "name": "Guided field",
+      "kind": "input",
+      "refersTo": "guided-input",
+      "description": "A label and local help stay above a tall number input.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-loan\">Amount to borrow</label><p id=\"ds-loan-help\">The amount you plan to borrow.</p><input id=\"ds-loan\" type=\"number\" value=\"3500000\" aria-describedby=\"ds-loan-help\"></div>",
+      "css": ".ds-field{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;color:var(--foreground,oklch(.145 0 0));font-size:.875rem}.ds-field label{font-weight:500}.ds-field p{margin:.5rem 0;line-height:1.5rem;color:var(--muted-foreground,oklch(.556 0 0))}.ds-field input{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;width:100%;height:3rem;padding:.5rem .75rem;box-sizing:border-box;border:1px solid var(--input,oklch(.922 0 0));border-radius:calc(var(--radius,.625rem) - 2px);background:var(--background,#fff);color:inherit;font-size:1rem;font-variant-numeric:tabular-nums;transition:border-color 150ms;outline:none}.ds-field input:focus-visible{box-shadow:0 0 0 2px var(--ring,oklch(.708 0 0))}.ds-field input:disabled{opacity:.5;cursor:not-allowed}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat bordered container used in Advanced.",
+      "html": "<section class=\"ds-card\"><h3>Loan details</h3><p>Enter the figures from your loan offer.</p></section>",
+      "css": ".ds-card{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;border:1px solid var(--border,oklch(.922 0 0));border-radius:var(--radius,.625rem);background:var(--card,#fff);color:var(--card-foreground,oklch(.145 0 0));padding:1rem}.ds-card h3{margin:0;font-size:1rem;line-height:1;font-weight:600}.ds-card p{margin:.375rem 0 0;font-size:.875rem;color:var(--muted-foreground,oklch(.556 0 0))}@media(min-width:40rem){.ds-card{padding:1.25rem}}"
+    },
+    {
+      "name": "Progress",
+      "kind": "nav",
+      "description": "Step text and bars show position in the guided form.",
+      "html": "<nav class=\"ds-progress\" aria-label=\"Estimate progress\"><p>Step 2 of 6 · New loan</p><ol><li class=\"ds-done\"></li><li class=\"ds-done\" aria-current=\"step\"></li><li></li><li></li><li></li><li></li></ol></nav>",
+      "css": ".ds-progress{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;color:var(--foreground,oklch(.145 0 0));font-size:.875rem}.ds-progress p{margin:0 0 .75rem}.ds-progress ol{display:flex;gap:.375rem;margin:0;padding:0;list-style:none}.ds-progress li{flex:1;height:.25rem;border-radius:9999px;background:var(--muted,oklch(.97 0 0))}.ds-progress li.ds-done{background:var(--foreground,oklch(.145 0 0))}"
+    },
+    {
+      "name": "Example label",
+      "kind": "chip",
+      "description": "A small text label identifies sample input.",
+      "html": "<span class=\"ds-example\">Example value</span>",
+      "css": ".ds-example{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-block;border:1px solid var(--border,oklch(.922 0 0));border-radius:.25rem;padding:.125rem .5rem;color:var(--foreground,oklch(.145 0 0));font-size:.75rem;line-height:1rem}"
+    },
+    {
+      "name": "Goal choice",
+      "kind": "custom",
+      "refersTo": "goal-choice",
+      "description": "Full-width choice with a check and a short explanation.",
+      "html": "<button class=\"ds-goal\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-check\"><svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m9 18-6-6 6 6L21 6\"/></svg></span><span><span class=\"ds-title\">Plan a new loan</span><span class=\"ds-detail\">Find a monthly payment or a loan amount that fits your budget.</span></span></button>",
+      "css": ".ds-goal{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:flex;width:100%;align-items:flex-start;gap:1rem;border:1px solid var(--foreground,oklch(.145 0 0));border-radius:calc(var(--radius,.625rem) + 4px);padding:1.25rem;text-align:left;color:var(--foreground,oklch(.145 0 0));background:color-mix(in oklab,var(--muted,oklch(.97 0 0)) 40%,transparent);cursor:pointer;transition:background-color 150ms}.ds-title{display:block;font-size:1rem;font-weight:500}.ds-detail{display:block;margin-top:.5rem;font-size:.875rem;line-height:1.5rem;color:var(--muted-foreground,oklch(.556 0 0))}.ds-check{display:flex;width:1.25rem;height:1.25rem;flex-shrink:0;align-items:center;justify-content:center;margin-top:.125rem;border-radius:9999px;background:var(--foreground,oklch(.145 0 0));color:var(--background,#fff)}.ds-goal:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:2px}.ds-goal[aria-pressed=\"false\"]{background:transparent;border-color:var(--border,oklch(.922 0 0))}.ds-goal[aria-pressed=\"false\"]:hover{background:color-mix(in oklab,var(--muted,oklch(.97 0 0)) 30%,transparent)}"
+    }
+  ],
+  "narrative": {
+    "overview": "The calculator uses a calm loan form with small field groups and local help.\nSimple and Advanced share the same type, controls, colors, and values.\nThis records the existing app. It does not set a new brand theme.",
+    "keyCharacteristics": [
+      "Neutral light and dark surfaces.",
+      "Lexend text with clear size and weight changes.",
+      "Rose-blue gradients on main actions.",
+      "Thin borders, short field help, and clear sample labels.",
+      "Open result sections with aligned numbers."
+    ],
+    "rules": [
+      {
+        "name": "The Theme Rule",
+        "body": "Use semantic surface and text tokens in both modes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Number Rule",
+        "body": "Align result values to the right and use tabular numbers.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Do use the same type and controls in Simple and Advanced.",
+      "Do keep field help next to the field.",
+      "Do mark sample values in text.",
+      "Do use semantic colors for both themes.",
+      "Do keep number columns aligned.",
+      "Do retain focus, reduced-motion, and print support."
+    ],
+    "donts": [
+      "Don't replace the current Lexend and rose-blue system during a routine extension.",
+      "Don't use color alone to mark errors or selected choices.",
+      "Don't hide estimate limits behind a tooltip."
+    ]
+  }
+}

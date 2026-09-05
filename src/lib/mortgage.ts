@@ -84,6 +84,7 @@ export type RefinanceInput = {
   newAnnualRate: number;
   newTermMonths: number;
   refinanceCosts: number;
+  feeTreatment?: "financed" | "upfront";
   extraPayments: ExtraPaymentRule[];
   startDate: string;
   extraPaymentMode: ExtraPaymentMode;
@@ -101,6 +102,8 @@ export type RefinanceComparison = {
   monthlySavings: number;
   interestSavings: number;
   totalSavings: number;
+  upfrontCosts: number;
+  refinanceTotalOutflow: number;
   breakEvenMonth: number | null;
   recommendation: "refinance" | "do-not-refinance" | "close-call";
   reason: string;
@@ -185,7 +188,11 @@ function isInterestOnlyMonth(periods: InterestOnlyPeriod[] = [], month: number) 
 function addMonths(dateString: string, monthOffset: number) {
   const date = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "";
+  const originalDay = date.getDate();
+  date.setDate(1);
   date.setMonth(date.getMonth() + monthOffset);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(originalDay, lastDay));
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
@@ -202,8 +209,12 @@ export function calculateAmortization(
   const initialRate = monthlyRate(rateForMonth(annualRate, solvedInput.ratePeriods, 1));
   const scheduledPayment =
     solvedInput.fixedMonthlyPayment ??
-    solvedInput.targetPayment ??
+    (solvedInput.solveTarget && solvedInput.solveTarget !== "payment" ? solvedInput.targetPayment : undefined) ??
     calculateMonthlyPayment(principal, annualRate, termMonths);
+
+  if (![principal, annualRate, termMonths, scheduledPayment].every(Number.isFinite)) {
+    throw new Error("Enter a valid loan amount, rate, term, and payment.");
+  }
 
   if (principal === 0 || termMonths === 0) {
     return {
@@ -312,6 +323,10 @@ export function calculateAmortization(
 }
 
 export function compareRefinance(input: RefinanceInput): RefinanceComparison {
+  if (!Number.isFinite(input.refinanceCosts) || input.refinanceCosts < 0) {
+    throw new Error("Enter refinance fees of zero or more.");
+  }
+  const upfrontCosts = input.feeTreatment === "upfront" ? input.refinanceCosts : 0;
   const current = calculateAmortization({
     principal: input.currentBalance,
     annualRate: input.currentAnnualRate,
@@ -326,7 +341,7 @@ export function compareRefinance(input: RefinanceInput): RefinanceComparison {
   });
 
   const refinance = calculateAmortization({
-    principal: input.currentBalance + Math.max(0, input.refinanceCosts),
+    principal: input.currentBalance + (input.feeTreatment === "upfront" ? 0 : input.refinanceCosts),
     annualRate: input.newAnnualRate,
     termMonths: input.newTermMonths,
     startDate: input.startDate,
@@ -339,8 +354,9 @@ export function compareRefinance(input: RefinanceInput): RefinanceComparison {
 
   const monthlySavings = current.monthlyPayment - refinance.monthlyPayment;
   const interestSavings = current.totalInterest - refinance.totalInterest;
-  const totalSavings = current.totalOutflow - refinance.totalOutflow;
-  const breakEvenMonth = findBreakEvenMonth(current, refinance);
+  const refinanceTotalOutflow = refinance.totalOutflow + upfrontCosts;
+  const totalSavings = current.totalOutflow - refinanceTotalOutflow;
+  const breakEvenMonth = findBreakEvenMonth(current, refinance, upfrontCosts);
   const hasMeaningfulSavings = totalSavings > 1000;
   const breaksEven = breakEvenMonth !== null && breakEvenMonth < current.payoffMonth;
 
@@ -364,6 +380,8 @@ export function compareRefinance(input: RefinanceInput): RefinanceComparison {
     monthlySavings,
     interestSavings,
     totalSavings,
+    upfrontCosts,
+    refinanceTotalOutflow,
     breakEvenMonth,
     recommendation,
     reason,
@@ -373,13 +391,14 @@ export function compareRefinance(input: RefinanceInput): RefinanceComparison {
 function findBreakEvenMonth(
   current: LoanScenarioResult,
   refinance: LoanScenarioResult,
+  upfrontCosts = 0,
 ) {
   const length = Math.max(current.rows.length, refinance.rows.length);
 
   for (let index = 0; index < length; index += 1) {
     const currentPaid = current.rows[index]?.cumulativeOutflow ?? current.totalOutflow;
     const refinancePaid =
-      refinance.rows[index]?.cumulativeOutflow ?? refinance.totalOutflow;
+      (refinance.rows[index]?.cumulativeOutflow ?? refinance.totalOutflow) + upfrontCosts;
 
     if (refinancePaid <= currentPaid) {
       return index + 1;

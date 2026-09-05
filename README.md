@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pag-IBIG Housing Loan Calculator
 
-## Getting Started
+A loan planning tool at `/labs/pagibig-calculator`.
 
-First, run the development server:
+## Use the calculator
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+Simple mode opens first. Choose a new loan or a refinance comparison. Enter your figures in small groups, check them, then show the estimate.
+
+For a new loan, start with an amount to borrow or a monthly loan budget. The budget covers principal and interest, not insurance, fees, or extra payments.
+
+For refinancing, use the unpaid principal and principal-and-interest payment from your latest statement. Enter the current rate, remaining term, and new offer. Add closing charges separately. Choose to pay fees now or add them to the new loan.
+
+Both paths support monthly, yearly, and one-time extra payments. The model can shorten the term or reduce later payments. Confirm actual payment rules with your lender.
+
+Use **Try an example** if you do not have your figures. Sample fields remain marked in the review, results, printout, and CSV export.
+
+Advanced mode keeps the complete calculator, including future rates, costs, interest-only periods, custom payment ranges, and solving for a term or rate. Both modes share values. Simple mode shows active Advanced settings and links back to edit them.
+
+## What an estimate means
+
+- The rate stays constant unless a future rate rule is entered. A fixing period does not automatically predict or apply a future rate.
+- Only entered costs are included. Insurance, taxes, and other charges are excluded unless added.
+- A budget-based loan amount is not an eligibility or income check.
+- Extra payments go directly to principal in the model. They pause during interest-only periods.
+- Fees paid now count once in the full refinance cost, outside monthly schedule rows. Financed fees increase the new balance and accrue interest.
+- Cash-flow crossing is the first month when cumulative payments on the new loan are no higher. That relationship can reverse. It is not guaranteed fee recovery.
+- The current loan is projected using its entered payment and rate. Its model payoff date can differ from the remaining term on a statement.
+
+Use your loan offer and statement as the source of your figures. Confirm terms with the lender. [Official Pag-IBIG housing loan help](https://www.pagibigfund.gov.ph/FAQ_HL.html) is linked in the guide. The official site may require a browser check. Existing rate assumptions remain under Advanced → Rates; no new official rate or eligibility claims were added.
+
+## Local development
+
+```sh
+pnpm install --frozen-lockfile
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000/labs/pagibig-calculator`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+pnpm lint
+pnpm test
+pnpm build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For browser checks, run the built app on port 3101. These scripts use an isolated Chrome session and save screenshots under `.impeccable/review/`.
 
-## Learn More
+```sh
+pnpm start --port 3101
+```
 
-To learn more about Next.js, take a look at the following resources:
+In another terminal:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```sh
+node scripts/check-ui.mjs
+node scripts/check-report-ui.mjs
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Set `CALCULATOR_TEST_URL` to check another local address. Chrome must be installed.
 
-## Deploy on Vercel
+Input data, mode, progress, and sample labels use `pagibig-calculator:v1` in local browser storage. Old saved inputs remain supported. Missing fee treatment means financed fees. Reloading a completed guide returns to review. Storage failure leaves the calculator usable in memory.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The parent `joween.dev` repo owns deployment, routing, availability fallback, robots, and sitemap. Validate this app before pinning its commit in the parent. Follow the parent's `docs/labs.md` for release checks.

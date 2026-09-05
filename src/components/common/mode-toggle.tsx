@@ -19,7 +19,7 @@ export function ModeToggle() {
   async function toggleTheme() {
     const newTheme = theme === "light" ? "dark" : "light";
 
-    if (!document.startViewTransition) {
+    if (!document.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setTheme(newTheme);
       return;
     }
