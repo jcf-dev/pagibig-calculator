@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState, type SetStateAction } from "react";
+import { useEffect, useId, useMemo, useState, type ComponentProps, type ReactNode, type SetStateAction } from "react";
 import {
   Calculator,
   Download,
   Info,
+  Maximize2,
   PiggyBank,
   Printer,
   RefreshCcw,
@@ -41,7 +42,7 @@ import {
   RATE_ASSUMPTIONS_REVIEWED_DATE,
   RATE_SOURCES,
 } from "@/lib/rates";
-import { formatNumber, formatPeso } from "@/lib/utils";
+import { formatMoneyInput, formatNumber, formatPeso, parseMoneyInput } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +53,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { defaultFinancing, defaultRefinance, defaultGuide, readStoredState, STORAGE_KEY, resolveRate, buildExtraRules, validateScenario, stepsFor, type FinancingState, type RefinanceState, type StoredState, type GuideState } from "@/lib/calculator-state";
 import { SimpleCalculator, EstimateNotes } from "@/components/calculator/simple-calculator";
@@ -283,8 +285,8 @@ export function PagibigCalculator() {
             </div>
 
             <TabsContent value="financing">
-              <EstimateNotes task="financing" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
-              <div className="grid gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
+              <AdvancedEstimateNotes task="financing" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
                 <Card>
                   <CardHeader>
                     <CardTitle>Financing inputs</CardTitle>
@@ -346,8 +348,8 @@ export function PagibigCalculator() {
             </TabsContent>
 
             <TabsContent value="refinance">
-              <EstimateNotes task="refinance" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
-              <div className="grid gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
+              <AdvancedEstimateNotes task="refinance" financing={financing} refinance={refinance} rates={rates} samples={guide.samples} />
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[390px_minmax(0,1fr)]">
                 <Card>
                   <CardHeader>
                     <CardTitle>Refinance inputs</CardTitle>
@@ -460,6 +462,24 @@ export function PagibigCalculator() {
   }
 }
 
+function AdvancedEstimateNotes(props: ComponentProps<typeof EstimateNotes>) {
+  return (
+    <>
+      <div className="hidden sm:block">
+        <EstimateNotes {...props} />
+      </div>
+      <details className="mb-4 rounded-lg border p-3 sm:hidden">
+        <summary className="calculator-controls flex min-h-11 cursor-pointer items-center font-medium">
+          Estimate assumptions
+        </summary>
+        <div className="pt-3 [&_.estimate-notes]:mb-0 [&_.estimate-notes]:border-0 [&_.estimate-notes]:bg-transparent [&_.estimate-notes]:p-0">
+          <EstimateNotes {...props} />
+        </div>
+      </details>
+    </>
+  );
+}
+
 
 function buildFinancingRules(state: FinancingState): ExtraPaymentRule[] {
   const rules: ExtraPaymentRule[] = [];
@@ -532,32 +552,23 @@ function MoneyField(props: Omit<Parameters<typeof NumberField>[0], "step">) {
   return (
     <div className="space-y-2">
       <FieldLabel label={label} description={description} htmlFor={id} />
-      <Input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        aria-invalid={invalid}
-        value={formatMoneyInput(value)}
-        onChange={(event) => {
-          const nextValue = parseMoneyInput(event.target.value);
-          onChange(nextValue);
-        }}
-      />
+      <div className="relative">
+        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
+          ₱
+        </span>
+        <Input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          aria-invalid={invalid}
+          className="pl-9 tabular-nums"
+          value={formatMoneyInput(value)}
+          onChange={(event) => onChange(parseMoneyInput(event.target.value))}
+        />
+      </div>
       {invalid && <p className="text-xs text-destructive">Enter an amount of at least {formatPeso(min)}{max !== undefined ? " and no more than " + formatPeso(max) : ""}.</p>}
     </div>
   );
-}
-
-function formatMoneyInput(value: number) {
-  if (!Number.isFinite(value)) return "";
-  return new Intl.NumberFormat("en-PH", {
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function parseMoneyInput(value: string) {
-  const normalizedValue = value.replace(/[₱,\s]/g, "");
-  return normalizedValue === "" ? NaN : Number(normalizedValue);
 }
 
 function DateField({ label, description, value, onChange }: { label: string; description?: string; value: string; onChange: (value: string) => void }) {
@@ -966,6 +977,7 @@ function ResultPanel({
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
+  const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
   if (result.error || !result.data) return <ErrorCard message={result.error} />;
   const data = result.data;
   const chartData = data.rows.filter((_, index) => index % 12 === 0 || index === data.rows.length - 1).map((row) => ({
@@ -975,7 +987,7 @@ function ResultPanel({
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label="Monthly due" value={formatPeso(data.monthlyPayment)} />
         <Metric label="Total interest" value={formatPeso(data.totalInterest)} />
@@ -987,24 +999,29 @@ function ResultPanel({
         <Metric label="Saved vs no extras" value={baseline ? formatPeso(baseline.totalOutflow - data.totalOutflow) : "Unavailable"} />
       </div>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3">
+        <CardHeader className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle>{title}</CardTitle>
             <CardDescription>Balance and cumulative interest over time.</CardDescription>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => window.print()} aria-label="Print report">
-                  <Printer />
-                </Button>
-                <Button variant="outline" size="icon" onClick={onExport} aria-label="Export CSV">
-                  <Download />
-                </Button>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Print report or export amortization schedule</TooltipContent>
-          </Tooltip>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Expand graph"
+              onClick={() => setExpandedView("graph")}
+            >
+              <Maximize2 />
+              <span className="hidden sm:inline">Expand graph</span>
+              <span className="sm:hidden">Expand</span>
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => window.print()} aria-label="Print report">
+              <Printer />
+            </Button>
+            <Button variant="outline" size="icon" onClick={onExport} aria-label="Export CSV">
+              <Download />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-60 sm:h-72">
@@ -1024,7 +1041,36 @@ function ResultPanel({
         </CardContent>
       </Card>
       <ScheduleViewControls value={scheduleView} onChange={onScheduleViewChange} />
-      <ScheduleTable rows={data.rows} view={scheduleView} />
+      <ScheduleTable rows={data.rows} view={scheduleView} onExpand={() => setExpandedView("schedule")} />
+      <ReportDialog
+        open={expandedView === "graph"}
+        onClose={() => setExpandedView(null)}
+        title="Loan balance and interest graph"
+        description="A larger view of the balance and cumulative interest over the loan."
+      >
+        <div className="h-[min(68dvh,44rem)] min-h-80">
+          {canRenderChart ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tickLine={false} />
+                <YAxis tickFormatter={(value) => `₱${Number(value) / 1_000_000}M`} width={60} />
+                <ChartTooltip formatter={(value) => formatPeso(Number(value))} />
+                <Area type="monotone" dataKey="balance" stroke="var(--chart-5)" fill="var(--chart-5)" fillOpacity={0.18} name="Balance" />
+                <Area type="monotone" dataKey="interest" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.18} name="Interest" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : null}
+        </div>
+      </ReportDialog>
+      <ReportDialog
+        open={expandedView === "schedule"}
+        onClose={() => setExpandedView(null)}
+        title="Amortization schedule"
+        description="The full selected schedule in a larger scrollable view."
+      >
+        <ScheduleTable rows={data.rows} view={scheduleView} expanded />
+      </ReportDialog>
     </div>
   );
 }
@@ -1042,6 +1088,7 @@ function RefinancePanel({
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
+  const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
   if (comparison.error || !comparison.data) return <ErrorCard message={comparison.error} />;
   const data = comparison.data;
   const chartData = Array.from({ length: Math.max(data.current.rows.length, data.refinance.rows.length) }, (_, index) => ({
@@ -1051,7 +1098,7 @@ function RefinancePanel({
   })).filter((_, index, all) => index % 12 === 0 || index === all.length - 1);
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1080,9 +1127,21 @@ function RefinancePanel({
         <Metric label="Cash-flow crossing" value={data.breakEvenMonth ? `Month ${data.breakEvenMonth}` : "No crossing"} detail="First month cumulative payments are no higher. This may reverse later; it is not guaranteed fee recovery." />
       </div>
       <Card>
-        <CardHeader>
-          <CardTitle>Current vs refinance cash outflow</CardTitle>
-          <CardDescription>Cumulative payments include entered costs and any fees paid now. Financed fees are repaid with the new loan.</CardDescription>
+        <CardHeader className="flex flex-col items-start justify-between gap-3 sm:flex-row">
+          <div>
+            <CardTitle>Current vs refinance cash outflow</CardTitle>
+            <CardDescription>Cumulative payments include entered costs and any fees paid now. Financed fees are repaid with the new loan.</CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label="Expand graph"
+            onClick={() => setExpandedView("graph")}
+          >
+            <Maximize2 />
+            <span className="hidden sm:inline">Expand graph</span>
+            <span className="sm:hidden">Expand</span>
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="h-60 sm:h-72">
@@ -1102,8 +1161,63 @@ function RefinancePanel({
         </CardContent>
       </Card>
       <ScheduleViewControls value={scheduleView} onChange={onScheduleViewChange} />
-      <ScheduleTable rows={data.refinance.rows} view={scheduleView} />
+      <ScheduleTable rows={data.refinance.rows} view={scheduleView} onExpand={() => setExpandedView("schedule")} />
+      <ReportDialog
+        open={expandedView === "graph"}
+        onClose={() => setExpandedView(null)}
+        title="Current and refinance cash outflow graph"
+        description="A larger view of cumulative payments for both loan paths."
+      >
+        <div className="h-[min(68dvh,44rem)] min-h-80">
+          {canRenderChart ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tickLine={false} />
+                <YAxis tickFormatter={(value) => `₱${Number(value) / 1_000_000}M`} width={60} />
+                <ChartTooltip formatter={(value) => formatPeso(Number(value))} />
+                <Line type="monotone" dataKey="current" stroke="var(--chart-5)" name="Current" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="refinance" stroke="var(--chart-1)" name="Refinance" dot={false} strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : null}
+        </div>
+      </ReportDialog>
+      <ReportDialog
+        open={expandedView === "schedule"}
+        onClose={() => setExpandedView(null)}
+        title="Refinance amortization schedule"
+        description="The full selected new-loan schedule in a larger scrollable view."
+      >
+        <ScheduleTable rows={data.refinance.rows} view={scheduleView} expanded />
+      </ReportDialog>
     </div>
+  );
+}
+
+function ReportDialog({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-auto pr-1">{children}</div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1141,16 +1255,38 @@ function ScheduleViewControls({
 function ScheduleTable({
   rows,
   view,
+  onExpand,
+  expanded = false,
 }: {
   rows: ReturnType<typeof calculateAmortization>["rows"];
   view: "monthly" | "annual" | "payments";
+  onExpand?: () => void;
+  expanded?: boolean;
 }) {
-  const chunkSize = 12;
+  const chunkSize = 3;
   const [visibleMonthCount, setVisibleMonthCount] = useState(chunkSize);
-  if (view === "annual") return <AnnualSummaryTable rows={rows} />;
-  if (view === "payments") return <PaymentScheduleTable rows={rows} />;
+  if (view === "annual") {
+    return (
+      <AnnualSummaryTable
+        rows={rows}
+        onExpand={expanded ? undefined : onExpand}
+        expanded={expanded}
+      />
+    );
+  }
+  if (view === "payments") {
+    return (
+      <PaymentScheduleTable
+        rows={rows}
+        onExpand={expanded ? undefined : onExpand}
+        expanded={expanded}
+      />
+    );
+  }
 
-  const boundedVisibleCount = Math.min(visibleMonthCount, rows.length);
+  const boundedVisibleCount = expanded
+    ? rows.length
+    : Math.min(visibleMonthCount, rows.length);
   const isFullyVisible = boundedVisibleCount >= rows.length;
   const shouldAppendFinalRow =
     rows.length > boundedVisibleCount && rows.at(-1)?.month !== rows[boundedVisibleCount - 1]?.month;
@@ -1161,7 +1297,7 @@ function ScheduleTable({
   const description = isFullyVisible
     ? "Showing all months."
     : boundedVisibleCount === chunkSize
-      ? "Showing first 12 months and final payment."
+      ? "Showing first 3 months and final payment."
       : `Showing first ${boundedVisibleCount} months and final payment.`;
 
   function showNextChunk() {
@@ -1171,8 +1307,18 @@ function ScheduleTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Amortization preview</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <CardTitle>Amortization preview</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
+          {onExpand && !expanded ? (
+            <Button variant="outline" size="sm" onClick={onExpand}>
+              <Maximize2 />
+              Expand schedule
+            </Button>
+          ) : null}
+        </div>
         <div className="mt-3 flex gap-2 rounded-md border bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
           <Info className="mt-0.5 size-3.5 shrink-0 text-foreground/70" />
           <p>
@@ -1230,12 +1376,12 @@ function ScheduleTable({
             </TableBody>
           </Table>
         </div>
-        {rows.length > chunkSize ? (
+        {!expanded && rows.length > chunkSize ? (
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
             {!isFullyVisible ? (
               <>
                 <Button variant="outline" onClick={showNextChunk} className="w-full sm:w-fit">
-                  Show next 12 months
+                  Show next 3 months
                 </Button>
                 <Button
                   variant="outline"
@@ -1252,7 +1398,7 @@ function ScheduleTable({
                 onClick={() => setVisibleMonthCount(chunkSize)}
                 className="w-full sm:w-fit"
               >
-                Collapse to first 12
+                Collapse to first 3
               </Button>
             ) : null}
           </div>
@@ -1262,83 +1408,185 @@ function ScheduleTable({
   );
 }
 
-function AnnualSummaryTable({ rows }: { rows: ReturnType<typeof calculateAmortization>["rows"] }) {
+function AnnualSummaryTable({
+  rows,
+  onExpand,
+  expanded = false,
+}: {
+  rows: ReturnType<typeof calculateAmortization>["rows"];
+  onExpand?: () => void;
+  expanded?: boolean;
+}) {
   const summaryRows = calculateAnnualSummary(rows);
+  const visibleRows = previewRowsWithFinal(summaryRows, 3, expanded);
+  const description =
+    expanded || visibleRows.length === summaryRows.length
+      ? "Showing all years."
+      : "Showing first 3 years and final year.";
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Annual summary</CardTitle>
-        <CardDescription>Totals grouped by calendar year.</CardDescription>
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <CardTitle>Annual summary</CardTitle>
+            <CardDescription>
+              Totals grouped by calendar year. {description}
+            </CardDescription>
+          </div>
+          {onExpand ? (
+            <Button variant="outline" size="sm" onClick={onExpand}>
+              <Maximize2 />
+              Expand schedule
+            </Button>
+          ) : null}
+        </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Year</TableHead>
-              <TableHead className="text-right">Payment</TableHead>
-              <TableHead className="text-right">Principal</TableHead>
-              <TableHead className="text-right">Interest</TableHead>
-              <TableHead className="text-right">Costs</TableHead>
-              <TableHead className="text-right">Outflow</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {summaryRows.map((row) => (
-              <TableRow key={row.year}>
-                <TableCell>{row.year}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.payment)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.principal)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.interest)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.endingBalance)}</TableCell>
+        <div data-mobile-schedule className="space-y-3 sm:hidden">
+          {visibleRows.map((row) => (
+            <div key={`${row.year}-mobile`} className="rounded-md border bg-muted/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">Year {row.year}</p>
+                <p className="text-sm font-semibold">{formatPeso(row.payment)}</p>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <MobileAmount label="Principal" value={row.principal} />
+                <MobileAmount label="Interest" value={row.interest} />
+                <MobileAmount label="Costs" value={row.costs} />
+                <MobileAmount label="Outflow" value={row.totalOutflow} />
+                <MobileAmount label="Balance" value={row.endingBalance} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Year</TableHead>
+                <TableHead className="text-right">Payment</TableHead>
+                <TableHead className="text-right">Principal</TableHead>
+                <TableHead className="text-right">Interest</TableHead>
+                <TableHead className="text-right">Costs</TableHead>
+                <TableHead className="text-right">Outflow</TableHead>
+                <TableHead className="text-right">Balance</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {visibleRows.map((row) => (
+                <TableRow key={row.year}>
+                  <TableCell>{row.year}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.payment)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.principal)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.interest)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.endingBalance)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-function PaymentScheduleTable({ rows }: { rows: ReturnType<typeof calculateAmortization>["rows"] }) {
+function PaymentScheduleTable({
+  rows,
+  onExpand,
+  expanded = false,
+}: {
+  rows: ReturnType<typeof calculateAmortization>["rows"];
+  onExpand?: () => void;
+  expanded?: boolean;
+}) {
+  const visibleRows = previewRowsWithFinal(rows, 3, expanded);
+  const description =
+    expanded || visibleRows.length === rows.length
+      ? "Showing all payments."
+      : "Showing first 3 payments and final payment.";
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Monthly payments</CardTitle>
-        <CardDescription>Scheduled payment, extra principal, costs, and total outflow.</CardDescription>
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <CardTitle>Monthly payments</CardTitle>
+            <CardDescription>
+              Scheduled payment, extra principal, costs, and total outflow. {description}
+            </CardDescription>
+          </div>
+          {onExpand ? (
+            <Button variant="outline" size="sm" onClick={onExpand}>
+              <Maximize2 />
+              Expand schedule
+            </Button>
+          ) : null}
+        </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Month</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Rate</TableHead>
-              <TableHead className="text-right">Scheduled</TableHead>
-              <TableHead className="text-right">Extra</TableHead>
-              <TableHead className="text-right">Costs</TableHead>
-              <TableHead className="text-right">Outflow</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={`${row.month}-payment`}>
-                <TableCell>{row.month}</TableCell>
-                <TableCell>{row.date}</TableCell>
-                <TableCell className="text-right">{formatNumber(row.annualRate)}%</TableCell>
-                <TableCell className="text-right">{formatPeso(row.scheduledPayment)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.extraPrincipal)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
-                <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+        <div data-mobile-schedule className="space-y-3 sm:hidden">
+          {visibleRows.map((row, index) => (
+            <div key={`${row.month}-payment-mobile`} className="rounded-md border bg-muted/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">
+                    {index === visibleRows.length - 1 && row.month !== index + 1
+                      ? `Final (${row.month})`
+                      : `Month ${row.month}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{row.date}</p>
+                </div>
+                <p className="text-sm font-semibold">{formatPeso(row.totalOutflow)}</p>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <MobileAmount label="Scheduled" value={row.scheduledPayment} />
+                <MobileAmount label="Extra" value={row.extraPrincipal} />
+                <MobileAmount label="Costs" value={row.costs} />
+                <div>
+                  <p className="text-muted-foreground">Rate</p>
+                  <p className="font-medium">{formatNumber(row.annualRate)}%</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Month</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Rate</TableHead>
+                <TableHead className="text-right">Scheduled</TableHead>
+                <TableHead className="text-right">Extra</TableHead>
+                <TableHead className="text-right">Costs</TableHead>
+                <TableHead className="text-right">Outflow</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {visibleRows.map((row) => (
+                <TableRow key={`${row.month}-payment`}>
+                  <TableCell>{row.month}</TableCell>
+                  <TableCell>{row.date}</TableCell>
+                  <TableCell className="text-right">{formatNumber(row.annualRate)}%</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.scheduledPayment)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.extraPrincipal)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.costs)}</TableCell>
+                  <TableCell className="text-right">{formatPeso(row.totalOutflow)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
+}
+
+function previewRowsWithFinal<Row>(rows: Row[], count: number, expanded: boolean) {
+  if (expanded || rows.length <= count) return rows;
+  return [...rows.slice(0, count), rows[rows.length - 1]];
 }
 
 function MobileAmount({ label, value }: { label: string; value: number }) {

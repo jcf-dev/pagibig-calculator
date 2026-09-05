@@ -26,7 +26,10 @@ Keep rose-blue color in small brand details, not buttons.
 Align the full page to one 72rem desktop shell.
 Show the goal first, then fields, a review, and the result.
 Use short help text beside each input. Keep all values when modes change.
+Put the peso mark on the left of money fields. Group thousands with commas.
 Show active Advanced rules in Simple. Let people edit them in Advanced.
+Keep all phone schedule tabs short. Use cards instead of wide tables.
+Open graphs and full schedules in a large dialog.
 
 ## Content and trust
 
@@ -41,6 +44,8 @@ Results are estimates, not official Pag-IBIG computations.
 Review comes before results. Keep progress and inputs in namespaced storage.
 Keep the permanent lab path and hard-load return link.
 Support small screens, keyboard use, reduced motion, and print.
+Start long Advanced estimate notes closed on small screens.
+Keep report dialogs inside the screen and let their content scroll.
 Use one calculation model for both modes. Reject invalid values safely.
 
 ## Open decisions

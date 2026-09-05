@@ -19,7 +19,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatNumber, formatPeso } from "@/lib/utils";
+import {
+  formatMoneyInput,
+  formatNumber,
+  formatPeso,
+  parseMoneyInput,
+} from "@/lib/utils";
 import {
   defaultFinancing,
   defaultRefinance,
@@ -935,6 +940,7 @@ function GuideField({
   onExample?: () => void;
 }) {
   const id = "guide-" + field.key;
+  const isMoney = field.unit === "₱";
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -956,11 +962,15 @@ function GuideField({
       <div className="relative">
         <Input
           id={id}
-          type={field.date ? "date" : "number"}
+          type={field.date ? "date" : isMoney ? "text" : "number"}
           step="any"
           inputMode={field.date ? undefined : "decimal"}
           value={
-            typeof value === "number" && !Number.isFinite(value) ? "" : value
+            typeof value === "number" && !Number.isFinite(value)
+              ? ""
+              : isMoney && typeof value === "number"
+                ? formatMoneyInput(value)
+                : value
           }
           aria-invalid={!!error}
           aria-describedby={id + "-help" + (error ? " " + id + "-error" : "")}
@@ -968,6 +978,8 @@ function GuideField({
             onChange(
               field.date
                 ? e.target.value
+                : isMoney
+                  ? parseMoneyInput(e.target.value)
                 : e.target.value === ""
                   ? NaN
                   : Number(e.target.value),
@@ -975,10 +987,15 @@ function GuideField({
           }
           className={
             "h-12 text-base tabular-nums md:text-base " +
-            (field.unit ? "pr-28" : "")
+            (isMoney ? "pl-9" : field.unit ? "pr-28" : "")
           }
         />
-        {field.unit && (
+        {isMoney && (
+          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
+            ₱
+          </span>
+        )}
+        {field.unit && !isMoney && (
           <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm text-muted-foreground">
             {field.unit}
           </span>

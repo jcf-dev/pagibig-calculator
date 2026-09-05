@@ -424,9 +424,17 @@
       "name": "Guided field",
       "kind": "input",
       "refersTo": "guided-input",
-      "description": "A label and local help stay above a tall number input.",
-      "html": "<div class=\"ds-field\"><label for=\"ds-loan\">Amount to borrow</label><p id=\"ds-loan-help\">The amount you plan to borrow.</p><input id=\"ds-loan\" type=\"number\" value=\"3500000\" aria-describedby=\"ds-loan-help\"></div>",
-      "css": ".ds-field{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;color:var(--foreground,oklch(.145 0 0));font-size:.875rem}.ds-field label{font-weight:500}.ds-field p{margin:.5rem 0;line-height:1.5rem;color:var(--muted-foreground,oklch(.556 0 0))}.ds-field input{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;width:100%;height:3rem;padding:.5rem .75rem;box-sizing:border-box;border:1px solid var(--input,oklch(.922 0 0));border-radius:calc(var(--radius,.625rem) - 2px);background:var(--background,#fff);color:inherit;font-size:1rem;font-variant-numeric:tabular-nums;transition:border-color 150ms;outline:none}.ds-field input:focus-visible{box-shadow:0 0 0 2px var(--ring,oklch(.708 0 0))}.ds-field input:disabled{opacity:.5;cursor:not-allowed}"
+      "description": "A label and local help stay above a tall money input with a left peso mark and grouped digits.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-loan\">Amount to borrow</label><p id=\"ds-loan-help\">The amount you plan to borrow.</p><span class=\"ds-money\"><span>₱</span><input id=\"ds-loan\" type=\"text\" inputmode=\"decimal\" value=\"3,500,000\" aria-describedby=\"ds-loan-help\"></span></div>",
+      "css": ".ds-field{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;color:var(--foreground,oklch(.145 0 0));font-size:.875rem}.ds-field label{font-weight:500}.ds-field p{margin:.5rem 0;line-height:1.5rem;color:var(--muted-foreground,oklch(.556 0 0))}.ds-money{position:relative;display:block}.ds-money>span{position:absolute;left:.75rem;top:50%;z-index:1;transform:translateY(-50%);color:var(--muted-foreground,oklch(.556 0 0))}.ds-field input{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;width:100%;height:3rem;padding:.5rem .75rem .5rem 2.25rem;box-sizing:border-box;border:1px solid var(--input,oklch(.922 0 0));border-radius:calc(var(--radius,.625rem) - 2px);background:var(--background,#fff);color:inherit;font-size:1rem;font-variant-numeric:tabular-nums;transition:border-color 150ms;outline:none}.ds-field input:focus-visible{box-shadow:0 0 0 2px var(--ring,oklch(.708 0 0))}.ds-field input:disabled{opacity:.5;cursor:not-allowed}"
+    },
+    {
+      "name": "Report dialog",
+      "kind": "dialog",
+      "refersTo": "report-dialog",
+      "description": "A large, scrollable view for graphs and full payment schedules.",
+      "html": "<section class=\"ds-dialog\" role=\"dialog\" aria-labelledby=\"ds-dialog-title\"><button aria-label=\"Close expanded view\">×</button><h2 id=\"ds-dialog-title\">Amortization schedule</h2><p>The full selected schedule in a larger scrollable view.</p></section>",
+      "css": ".ds-dialog{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;position:relative;width:min(calc(100% - 2rem),80rem);max-height:calc(100dvh - 2rem);overflow:auto;box-sizing:border-box;border:1px solid var(--border,oklch(.922 0 0));border-radius:var(--radius,.625rem);padding:1rem;background:var(--background,#fff);color:var(--foreground,oklch(.145 0 0));box-shadow:0 20px 25px -5px rgb(0 0 0 / .2)}.ds-dialog button{position:absolute;top:.75rem;right:.75rem}.ds-dialog h2{margin:0 3rem .375rem 0;font-size:1.125rem}.ds-dialog p{margin:0;color:var(--muted-foreground,oklch(.556 0 0));font-size:.875rem}"
     },
     {
       "name": "Card",

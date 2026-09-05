@@ -21,7 +21,10 @@ try {
       }, solveTarget);
       await page.reload();
       const note = solveTarget === "term" ? "The term is calculated from your target payment." : "The base rate is calculated from your target payment.";
-      await page.getByText(note, { exact: false }).waitFor();
+      if (width < 640) {
+        await page.getByText("Estimate assumptions", { exact: true }).click();
+      }
+      await page.getByText(note, { exact: false }).filter({ visible: true }).waitFor();
       await page.getByRole("button", { name: "Simple · step by step", exact: true }).click();
       await page.getByRole("heading", { name: "Check your inputs", exact: true }).waitFor();
       assert.ok(await page.getByText(note, { exact: false }).isVisible());

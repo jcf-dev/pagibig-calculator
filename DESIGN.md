@@ -109,7 +109,7 @@ components:
     textColor: "{colors.foreground}"
     rounded: "{rounded.md}"
     height: "3rem"
-    padding: "0.5rem 0.75rem"
+    padding: "0.5rem 0.75rem 0.5rem 2.25rem"
   card:
     backgroundColor: "{colors.card}"
     textColor: "{colors.foreground}"
@@ -117,6 +117,11 @@ components:
   goal-choice:
     rounded: "{rounded.xl}"
     padding: "1.25rem"
+  report-dialog:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.lg}"
+    padding: "1rem"
 ---
 
 # Design System: Pag-IBIG Housing Loan Calculator
@@ -181,6 +186,7 @@ Some notes use a taller line height for full sentences.
 Guided inputs use base-size text (1rem).
 Money values and number fields use tabular numbers.
 This gives each digit the same width.
+Money fields place the peso mark on the left and group thousands with commas.
 
 **The Number Rule.** Align result values to the right and use tabular numbers.
 
@@ -204,6 +210,10 @@ Advanced uses a 390px input column beside flexible results from 64rem.
 Its smaller grids use the same spacing and controls.
 Wide tables scroll inside their own container.
 Result rows wrap when their labels and values need more room.
+On small screens, Advanced estimate notes start closed.
+Schedule tabs use short previews and phone cards.
+The page shows three early rows and the final row.
+Large graph and schedule views stay inside a scrollable dialog.
 
 Print uses a white page and dark text.
 It hides controls, the header, the footer, and side help.
@@ -252,6 +262,7 @@ Focus adds a visible ring and outline.
 Inputs use the current background and input border tokens.
 Guided fields are taller than the shared base input.
 Each guided field keeps its label, help, unit, sample label, and error nearby.
+Money fields keep the peso mark inside the left side of the field.
 Focus adds a ring.
 Errors use descriptive text.
 Disabled inputs use lower opacity and a blocked cursor.
@@ -286,6 +297,8 @@ Supporting values use divided rows.
 Loan comparisons use a table with right-aligned numbers.
 Notes state what the estimate includes.
 Charts, schedules, and export remain in an expandable report section.
+Graphs and full schedules open in a large dialog with a clear close button.
+Annual and Payments use stacked cards instead of wide tables on small screens.
 
 ## Do's and Don'ts
 
@@ -296,6 +309,7 @@ Charts, schedules, and export remain in an expandable report section.
 - Do mark sample values in text.
 - Do use semantic colors for both themes.
 - Do keep number columns aligned.
+- Do group thousands in money fields.
 - Do retain focus, reduced-motion, and print support.
 
 ### Don't:

@@ -49,7 +49,7 @@ describe("guided calculator", () => {
     click("Next");
     expect(
       screen
-        .getByRole("spinbutton", { name: "Amount to borrow" })
+        .getByRole("textbox", { name: "Amount to borrow" })
         .getAttribute("aria-invalid"),
     ).toBe("true");
     expect(screen.queryByText("Regular monthly loan payment")).toBeNull();
@@ -68,6 +68,15 @@ describe("guided calculator", () => {
     click("Show my estimate");
     expect(screen.getByRole("heading", { name: "Your estimate" })).toBeTruthy();
     expect(screen.getAllByText("₱5,995.51").length).toBeGreaterThan(0);
+  });
+
+  it("shows a left peso mark and grouped digits in money fields", async () => {
+    await start();
+    click("Start my estimate");
+    change("Amount to borrow", "1234567.89");
+    const amount = screen.getByLabelText("Amount to borrow");
+    expect(amount.getAttribute("value")).toBe("1,234,567.89");
+    expect(amount.parentElement?.textContent).toContain("₱");
   });
 
   it("keeps example labels through review and result, including a review edit", async () => {
@@ -121,7 +130,7 @@ describe("guided calculator", () => {
     click("Simple · step by step");
     expect(
       screen.getByLabelText("Amount to borrow").getAttribute("value"),
-    ).toBe("1700000");
+    ).toBe("1,700,000");
     expect(screen.getByText("Rate: 8% from month 61 onward.")).toBeTruthy();
   });
 
@@ -178,6 +187,33 @@ describe("guided calculator", () => {
     );
     click("Start my estimate");
     expect(screen.getByLabelText("Amount to borrow")).toBeTruthy();
+  });
+
+  it("opens the graph and full schedule in dialogs", async () => {
+    await loadExample();
+    click("Next");
+    click("Next");
+    click("Next");
+    click("Show my estimate");
+    fireEvent.click(
+      screen.getByText("Charts, payment schedule, and export"),
+    );
+
+    click("Expand graph");
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(
+      screen.getByRole("heading", {
+        name: "Loan balance and interest graph",
+      }),
+    ).toBeTruthy();
+    click("Close expanded view");
+
+    click("Expand schedule");
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Amortization schedule" }),
+    ).toBeTruthy();
+    expect(screen.getByText("Showing all months.")).toBeTruthy();
   });
 
   it.each(["term", "rate"] as const)("does not label a saved %s output as an assumption", async (solveTarget) => {

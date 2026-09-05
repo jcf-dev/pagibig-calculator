@@ -91,6 +91,12 @@ try {
     );
     await button("Back").click();
     await button("Try an example").click();
+    const amountInput = page.getByLabel("Amount to borrow", { exact: true });
+    assert.equal(await amountInput.inputValue(), "3,500,000");
+    assert.ok(
+      (await amountInput.locator("..").textContent()).includes("₱"),
+      "Money fields must show the peso mark on the left",
+    );
     await shot("loan");
     await button("Next").click();
     await button("Next").click();
@@ -113,6 +119,62 @@ try {
     await page
       .getByText("Charts, payment schedule, and export", { exact: true })
       .click();
+    await button("Expand graph").click();
+    await page
+      .getByRole("dialog")
+      .getByRole("heading", {
+        name: "Loan balance and interest graph",
+        exact: true,
+      })
+      .waitFor();
+    await page.screenshot({
+      path: path.join(output, size.name + "-graph-dialog.png"),
+    });
+    await button("Close expanded view").click();
+    if (size.width < 640) {
+      for (const [tabName, headingName] of [
+        ["Annual", "Annual summary"],
+        ["Payments", "Monthly payments"],
+      ]) {
+        await page.getByRole("tab", { name: tabName, exact: true }).click();
+        const card = page
+          .getByRole("heading", { name: headingName, exact: true })
+          .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')][1]");
+        const mobileLayout = await card.evaluate((element) => ({
+          hasMobileCards:
+            element.querySelector("[data-mobile-schedule]")?.checkVisibility() ??
+            false,
+          wideVisibleAreas: [...element.querySelectorAll(".overflow-auto")]
+            .filter((area) => area.checkVisibility())
+            .filter((area) => area.scrollWidth > area.clientWidth + 1).length,
+        }));
+        assert.ok(
+          mobileLayout.hasMobileCards,
+          tabName + " must use cards on a phone",
+        );
+        assert.equal(
+          mobileLayout.wideVisibleAreas,
+          0,
+          tabName + " must not need sideways drag on a phone",
+        );
+      }
+      await page.getByRole("tab", { name: "Monthly", exact: true }).click();
+    }
+    await button("Expand schedule").click();
+    await page
+      .getByRole("dialog")
+      .getByRole("heading", { name: "Amortization schedule", exact: true })
+      .waitFor();
+    assert.ok(
+      await page
+        .getByRole("dialog")
+        .getByText("Showing all months.", { exact: true })
+        .isVisible(),
+    );
+    await page.screenshot({
+      path: path.join(output, size.name + "-schedule-dialog.png"),
+    });
+    await button("Close expanded view").click();
     const downloadEvent = page.waitForEvent("download");
     await page.getByRole("button", { name: "Export CSV", exact: true }).click();
     const download = await downloadEvent;
@@ -139,6 +201,17 @@ try {
     await page.emulateMedia({ media: "screen" });
     await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
     await button("Advanced").click();
+    if (size.width < 640) {
+      assert.equal(
+        await page
+          .locator("details")
+          .filter({ hasText: "Estimate assumptions" })
+          .getAttribute("open"),
+        null,
+        "Mobile assumptions must start closed",
+      );
+    }
+    await shot("advanced");
     await page.getByRole("tab", { name: "Rates", exact: true }).click();
     await page
       .getByRole("heading", { name: "Rates and assumptions", exact: true })
@@ -168,7 +241,7 @@ try {
     await context.close();
     console.log(
       size.name +
-        ": new loan, refinance, errors, modes, reload, CSV, print, and page width passed",
+        ": money fields, report dialogs, mobile layout, core flows, and page width passed",
     );
   }
   assert.deepEqual(errors, [], "Browser errors");

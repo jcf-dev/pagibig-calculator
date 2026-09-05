@@ -27,3 +27,17 @@ export function formatNumber(value: number) {
     maximumFractionDigits: 2,
   }).format(Number.isFinite(value) ? value : 0);
 }
+
+export function formatMoneyInput(value: number) {
+  if (!Number.isFinite(value)) return "";
+  return new Intl.NumberFormat("en-PH", {
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function parseMoneyInput(value: string) {
+  const normalizedValue = value.replace(/[₱,\s]/g, "");
+  if (normalizedValue === "") return NaN;
+  const parsedValue = Number(normalizedValue);
+  return Number.isFinite(parsedValue) ? parsedValue : NaN;
+}
