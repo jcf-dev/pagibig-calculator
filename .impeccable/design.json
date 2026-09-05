@@ -284,20 +284,6 @@
           "oklch(0.950 0.243 264.376)"
         ]
       },
-      "action-rose": {
-        "role": "primary",
-        "displayName": "Action Rose",
-        "tonalRamp": [
-          "oklch(0.150 0.222 16.935)",
-          "oklch(0.264 0.222 16.935)",
-          "oklch(0.379 0.222 16.935)",
-          "oklch(0.493 0.222 16.935)",
-          "oklch(0.607 0.222 16.935)",
-          "oklch(0.721 0.222 16.935)",
-          "oklch(0.836 0.222 16.935)",
-          "oklch(0.950 0.222 16.935)"
-        ]
-      },
       "action-blue": {
         "role": "primary",
         "displayName": "Action Blue",
@@ -310,20 +296,6 @@
           "oklch(0.721 0.243 264.376)",
           "oklch(0.836 0.243 264.376)",
           "oklch(0.950 0.243 264.376)"
-        ]
-      },
-      "action-rose-hover": {
-        "role": "primary",
-        "displayName": "Action Rose Hover",
-        "tonalRamp": [
-          "oklch(0.150 0.222 16.935)",
-          "oklch(0.264 0.222 16.935)",
-          "oklch(0.379 0.222 16.935)",
-          "oklch(0.493 0.222 16.935)",
-          "oklch(0.607 0.222 16.935)",
-          "oklch(0.721 0.222 16.935)",
-          "oklch(0.836 0.222 16.935)",
-          "oklch(0.950 0.222 16.935)"
         ]
       },
       "action-blue-hover": {
@@ -428,9 +400,9 @@
       "name": "Primary button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Main action and selected calculator mode.",
+      "description": "Main action in the current calculator step.",
       "html": "<button class=\"ds-button\">Start my estimate</button>",
-      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:linear-gradient(to right,oklch(51.4% .222 16.935),oklch(48.8% .243 264.376));color:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .1),0 1px 2px -1px rgb(0 0 0 / .1)}.ds-button:hover{background:linear-gradient(to right,oklch(45.5% .188 13.697),oklch(42.4% .199 265.638))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:oklch(48.8% .243 264.376);color:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .1),0 1px 2px -1px rgb(0 0 0 / .1)}.ds-button:hover{background:oklch(42.4% .199 265.638)}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
     },
     {
       "name": "Outline button",
@@ -438,7 +410,7 @@
       "refersTo": "button-outline",
       "description": "Secondary action such as using an example.",
       "html": "<button class=\"ds-button\">Try an example</button>",
-      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid var(--input,oklch(.922 0 0));background:var(--background,#fff);color:var(--foreground,oklch(.145 0 0));box-shadow:0 1px 2px rgb(0 0 0 / .05)}.ds-button:hover{border-color:oklch(64.5% .246 16.439 / .5);background:linear-gradient(to right,oklch(64.5% .246 16.439 / .1),oklch(62.3% .214 259.815 / .1))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid var(--input,oklch(.922 0 0));background:var(--background,#fff);color:var(--foreground,oklch(.145 0 0));box-shadow:0 1px 2px rgb(0 0 0 / .05)}.ds-button:hover{background:var(--accent,oklch(.97 0 0))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
     },
     {
       "name": "Ghost button",
@@ -446,7 +418,7 @@
       "refersTo": "button-ghost",
       "description": "Light action such as returning to an earlier step.",
       "html": "<button class=\"ds-button\">Back</button>",
-      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:transparent;color:var(--foreground,oklch(.145 0 0))}.ds-button:hover{background:linear-gradient(to right,oklch(64.5% .246 16.439 / .1),oklch(62.3% .214 259.815 / .1))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
+      "css": ".ds-button{font-family:var(--font-lexend, Lexend),Arial,Helvetica,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:.5rem 1rem;border-radius:calc(var(--radius,.625rem) - 2px);font-size:.875rem;font-weight:500;transition:all 150ms cubic-bezier(.4,0,.2,1);cursor:pointer;border:0;background:transparent;color:var(--foreground,oklch(.145 0 0))}.ds-button:hover{background:var(--accent,oklch(.97 0 0))}.ds-button:focus-visible{outline:2px solid var(--foreground,oklch(.145 0 0));outline-offset:4px;box-shadow:0 0 0 3px color-mix(in oklab,var(--ring,oklch(.708 0 0)) 50%,transparent)}.ds-button:disabled{pointer-events:none;opacity:.5}"
     },
     {
       "name": "Guided field",
@@ -492,7 +464,7 @@
     "keyCharacteristics": [
       "Neutral light and dark surfaces.",
       "Lexend text with clear size and weight changes.",
-      "Rose-blue gradients on main actions.",
+      "Solid blue main actions and neutral secondary controls.",
       "Thin borders, short field help, and clear sample labels.",
       "Open result sections with aligned numbers."
     ],
@@ -517,7 +489,7 @@
       "Do retain focus, reduced-motion, and print support."
     ],
     "donts": [
-      "Don't replace the current Lexend and rose-blue system during a routine extension.",
+      "Don't add gradients to buttons or their hover states.",
       "Don't use color alone to mark errors or selected choices.",
       "Don't hide estimate limits behind a tooltip."
     ]

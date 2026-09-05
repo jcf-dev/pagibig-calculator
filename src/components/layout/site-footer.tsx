@@ -8,7 +8,7 @@ import { LABS_URL } from "@/config/site";
 export function SiteFooter() {
   return (
     <footer className="border-t bg-background/[0.01] py-6 backdrop-blur supports-[backdrop-filter]:bg-background/[0.01]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 sm:px-6 md:grid md:grid-cols-3 md:items-center lg:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-4 sm:px-6 md:grid md:grid-cols-3 md:items-center lg:px-8">
         <div className="order-last hidden items-center justify-center md:order-first md:flex md:justify-start">
           <ModeToggle />
         </div>

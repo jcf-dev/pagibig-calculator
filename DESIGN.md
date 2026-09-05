@@ -22,9 +22,7 @@ colors:
   dark-destructive: "oklch(0.704 0.191 22.216)"
   brand-rose: "#ff2357"
   brand-blue: "#3080ff"
-  action-rose: "oklch(51.4% 0.222 16.935)"
   action-blue: "oklch(48.8% 0.243 264.376)"
-  action-rose-hover: "oklch(45.5% 0.188 13.697)"
   action-blue-hover: "oklch(42.4% 0.199 265.638)"
   action-text: "#ffffff"
 typography:
@@ -82,6 +80,7 @@ spacing:
   "12": "3rem"
 components:
   button-primary:
+    backgroundColor: "{colors.action-blue}"
     textColor: "{colors.action-text}"
     typography: "{typography.label}"
     rounded: "{rounded.md}"
@@ -132,7 +131,7 @@ This records the existing app. It does not set a new brand theme.
 
 - Neutral light and dark surfaces.
 - Lexend text with clear size and weight changes.
-- Rose-blue gradients on main actions.
+- Solid blue main actions and neutral secondary controls.
 - Thin borders, short field help, and clear sample labels.
 - Open result sections with aligned numbers.
 
@@ -142,13 +141,12 @@ The task flow is recorded in `.impeccable/surfaces/src-app-calculator-tsx.md`.
 
 ## Colors
 
-Neutral surfaces carry the form. Rose and blue mark actions and brand details.
+Neutral surfaces carry the form. Solid blue marks main actions. Rose and blue remain small brand details.
 
 ### Primary
 
-Action rose and action blue form the main button gradient from left to right.
-Their darker hover values keep white button text clear.
-The brighter brand rose and brand blue appear in the thin line below the page title.
+Action blue fills main buttons. Its darker hover value keeps white button text clear.
+Brand rose and brand blue appear in the thin line below the page title.
 
 ### Secondary
 
@@ -188,13 +186,12 @@ This gives each digit the same width.
 
 ## Layout
 
-The outer page has a maximum width of 80rem.
+The header, title, mode controls, progress, and calculator share a maximum width of 72rem.
 Its side padding grows from 1rem to 1.5rem at 40rem, then to 2rem at 64rem.
 The header is 3.5rem tall and stays at the top when the page scrolls.
 
-The guided calculator has a maximum width of 64rem.
 At widths below 64rem, help follows the form.
-At 64rem and above, help sits in a 15rem side column.
+At 64rem and above, help sits in a 14rem side column.
 The column gap grows from 2rem to 3rem.
 A thin border separates help from the form.
 
@@ -241,8 +238,9 @@ Icons use simple SVG line shapes beside text or in labeled controls.
 
 ### Buttons
 
-The primary button uses the rose-blue action gradient.
+The primary button uses a solid blue fill and a darker blue hover fill.
 Outline and ghost buttons handle other actions.
+Their hover state uses the neutral accent fill.
 Normal buttons are 2.75rem tall.
 Large buttons are 3rem tall.
 Icon buttons have the same width and height as normal buttons.
@@ -268,7 +266,7 @@ Estimate notes use a bordered, lightly muted box.
 ### Navigation
 
 The mode group shows Simple and Advanced at all steps.
-The selected mode uses the primary button treatment.
+The selected mode uses the neutral secondary button treatment.
 Advanced tabs use a muted track and a raised active tab.
 Guided progress uses a row of short bars with a text step count.
 Completed and current bars use foreground; later bars use muted.
@@ -302,6 +300,6 @@ Charts, schedules, and export remain in an expandable report section.
 
 ### Don't:
 
-- Don't replace the current Lexend and rose-blue system during a routine extension.
+- Don't add gradients to buttons or their hover states.
 - Don't use color alone to mark errors or selected choices.
 - Don't hide estimate limits behind a tooltip.

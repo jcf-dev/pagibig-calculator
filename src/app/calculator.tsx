@@ -230,7 +230,7 @@ export function PagibigCalculator() {
     <TooltipProvider>
       <main className="min-h-screen bg-background">
         <section className="border-b bg-muted/30">
-          <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-4xl">
@@ -248,10 +248,10 @@ export function PagibigCalculator() {
           </div>
         </section>
 
-        <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <div className="calculator-controls mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex rounded-lg border p-1" role="group" aria-label="Calculator mode">
-              {(["simple", "advanced"] as const).map((mode) => <Button key={mode} variant={guide.mode === mode ? "default" : "ghost"} aria-pressed={guide.mode === mode} onClick={() => setGuide((g) => ({ ...g, mode, step: Math.min(g.step, stepsFor(g.task).length - 2) }))}>{mode === "simple" ? "Simple · step by step" : "Advanced"}</Button>)}
+              {(["simple", "advanced"] as const).map((mode) => <Button key={mode} variant={guide.mode === mode ? "secondary" : "ghost"} aria-pressed={guide.mode === mode} onClick={() => setGuide((g) => ({ ...g, mode, step: Math.min(g.step, stepsFor(g.task).length - 2) }))}>{mode === "simple" ? "Simple · step by step" : "Advanced"}</Button>)}
             </div>
             <p className="text-xs text-muted-foreground">Your inputs stay with you when you switch.</p>
           </div>

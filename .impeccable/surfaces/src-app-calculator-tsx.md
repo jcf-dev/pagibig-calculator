@@ -20,7 +20,10 @@ Refinancing compares the current loan with a new loan.
 
 ## Direction
 
-Keep the existing light and dark themes, Lexend type, and rose-blue controls.
+Keep the existing light and dark themes and Lexend type.
+Use solid blue main buttons and neutral secondary controls.
+Keep rose-blue color in small brand details, not buttons.
+Align the full page to one 72rem desktop shell.
 Show the goal first, then fields, a review, and the result.
 Use short help text beside each input. Keep all values when modes change.
 Show active Advanced rules in Simple. Let people edit them in Advanced.

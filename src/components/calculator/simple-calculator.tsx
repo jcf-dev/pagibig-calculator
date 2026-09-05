@@ -395,7 +395,7 @@ export function SimpleCalculator(props: Props) {
     : fields.map((f) => errors[f.key]).find(Boolean);
 
   return (
-    <div className="guided-calculator mx-auto max-w-5xl">
+    <div className="guided-calculator w-full">
       <nav aria-label="Estimate progress" className="calculator-controls mb-7">
         <div className="mb-3 flex items-center justify-between gap-4 text-sm">
           <p>
@@ -433,7 +433,7 @@ export function SimpleCalculator(props: Props) {
         </ol>
       </nav>
 
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-12">
         <section className="min-w-0">
           <h2
             ref={heading}

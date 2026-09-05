@@ -13,6 +13,7 @@ const errors = [];
 try {
   for (const size of [
     { name: "desktop", width: 1440, height: 1000, colorScheme: "light" },
+    { name: "user-1567", width: 1567, height: 908, colorScheme: "dark" },
     { name: "mobile", width: 390, height: 844, colorScheme: "dark" },
   ]) {
     const context = await browser.newContext({
@@ -50,6 +51,35 @@ try {
         .click();
       await page.locator("html.light").waitFor();
     }
+    const layout = await page.evaluate(() => {
+      const elements = [
+        document.querySelector("h1"),
+        document.querySelector('[aria-label="Calculator mode"]'),
+        document.querySelector('nav[aria-label="Estimate progress"]'),
+        document.querySelector("h2"),
+      ];
+      const leftEdges = elements.map((element) =>
+        element.getBoundingClientRect().left,
+      );
+      return {
+        leftEdges,
+        shellWidth: document
+          .querySelector("h1")
+          .closest(".max-w-6xl")
+          .getBoundingClientRect().width,
+        gradientButtons: [...document.querySelectorAll("button")]
+          .filter(
+            (element) => getComputedStyle(element).backgroundImage !== "none",
+          )
+          .map((element) => element.textContent.trim()),
+      };
+    });
+    assert.ok(
+      Math.max(...layout.leftEdges) - Math.min(...layout.leftEdges) <= 1,
+      "Title, mode, progress, and form must share one left edge",
+    );
+    assert.ok(layout.shellWidth <= 1152, "Desktop shell must stay within 72rem");
+    assert.deepEqual(layout.gradientButtons, [], "Buttons must not use gradients");
     await shot("goal");
     await button("Start my estimate").click();
     await button("Next").click();

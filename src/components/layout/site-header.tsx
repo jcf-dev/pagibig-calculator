@@ -25,7 +25,7 @@ export function SiteHeader() {
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <a href={LABS_URL} className="flex items-center gap-2" aria-label="Back to Joween Labs">
           <LogoMark />
           <span className="hidden text-sm text-muted-foreground sm:inline">Back to Labs</span>
