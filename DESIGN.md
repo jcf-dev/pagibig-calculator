@@ -237,6 +237,13 @@ Normal control transitions last 150ms.
 The header transition lasts 300ms.
 Reduced-motion settings shorten animations and transitions and stop smooth scrolling.
 
+The footer matches the main joween.dev footer in content, link order, spacing,
+and interaction states. It keeps normal phone spacing because this zone does
+not use the main site's floating phone menu.
+
+The browser icon reuses the main site's 32px JF mark. Its background moves
+from rose `#f43f5e` to blue `#3b82f6`.
+
 ## Shapes
 
 Inputs and buttons use the medium radius.
