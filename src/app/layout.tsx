@@ -1,28 +1,10 @@
 import type { Metadata } from "next";
-import { Doto, Lexend, Lexend_Deca } from "next/font/google";
-import { ThemeProvider } from "@/components/common/theme-provider";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
+import { SiteShell } from "@joween/site-shell";
+import { siteFontClassName } from "@joween/site-shell/fonts";
+import { ThemeProvider } from "@joween/site-shell/theme-provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { LAB_BASE_PATH, SITE_ORIGIN } from "@/config/site";
 import "./globals.css";
-
-const lexend = Lexend({
-  variable: "--font-lexend",
-  subsets: ["latin"],
-});
-
-const lexendDeca = Lexend_Deca({
-  variable: "--font-lexend-deca",
-  subsets: ["latin"],
-  weight: "500",
-});
-
-const doto = Doto({
-  variable: "--font-doto",
-  subsets: ["latin"],
-  weight: "600",
-});
 
 const siteUrl = new URL(SITE_ORIGIN);
 const siteDescription =
@@ -79,21 +61,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${lexend.variable} ${lexendDeca.variable} ${doto.variable} antialiased`}
+        className={`${siteFontClassName} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <div className="relative flex min-h-screen flex-col">
-            <StructuredData />
-            <SiteHeader />
-            <div className="flex-1">{children}</div>
-            <SiteFooter />
-          </div>
+        <ThemeProvider>
+          <StructuredData />
+          <SiteShell zoneBasePath={LAB_BASE_PATH}>{children}</SiteShell>
         </ThemeProvider>
       </body>
     </html>
