@@ -1,55 +1,42 @@
-import Link from "next/link";
-import { Bot, Heart, Mail, Send } from "lucide-react";
-import { ModeToggle } from "@/components/common/mode-toggle";
+import { Mail, Send } from "lucide-react";
 import { UpworkIcon } from "@/components/icons/upwork-icon";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
-import { LABS_URL } from "@/config/site";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t bg-background/[0.01] py-6 backdrop-blur supports-[backdrop-filter]:bg-background/[0.01]">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-4 sm:px-6 md:grid md:grid-cols-3 md:items-center lg:px-8">
-        <div className="order-last hidden items-center justify-center md:order-first md:flex md:justify-start">
-          <ModeToggle />
-        </div>
-
-        <div className="flex flex-col items-center gap-1 text-center text-xs text-muted-foreground">
-          <div className="flex items-center justify-center gap-1">
-            <span>Made with</span>
-            <Heart className="h-3.5 w-3.5" />
-            <span>and</span>
-            <Bot className="h-3.5 w-3.5" />
-          </div>
-          <div>
-            <span>&copy; {new Date().getFullYear()} Joween Flores</span>
-            <span className="mx-2">|</span>
+    <footer className="border-t border-border/40 bg-background/45 backdrop-blur-xl">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 px-[clamp(1.25rem,4vw,2rem)] py-6 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <p>End-to-end software engineering from the Philippines, available worldwide.</p>
+          <p>
+            © {new Date().getFullYear()} Joween Flores ·{" "}
             <a
-              href={LABS_URL}
-              className="transition-colors hover:text-foreground hover:underline"
+              href="/privacy-policy"
+              className="underline-offset-4 hover:text-foreground hover:underline"
             >
-              Joween Labs
+              Privacy policy
             </a>
-          </div>
+          </p>
         </div>
 
-        <div className="flex items-center justify-center gap-4 md:justify-end">
+        <div className="flex flex-wrap gap-1 lg:justify-end">
           <FooterIcon href="mailto:hello@joween.dev" label="Email">
-            <Mail className="h-4 w-4" />
-          </FooterIcon>
-          <FooterIcon href="https://wa.me/639944860433" label="WhatsApp">
-            <WhatsAppIcon className="h-4 w-4" />
-          </FooterIcon>
-          <FooterIcon href="https://t.me/jcfdev" label="Telegram">
-            <Send className="h-4 w-4" />
-          </FooterIcon>
-          <FooterIcon href="https://www.upwork.com/freelancers/jcfdev" label="Upwork">
-            <UpworkIcon className="h-4 w-4" />
+            <Mail className="h-4 w-4" aria-hidden="true" />
           </FooterIcon>
           <FooterIcon href="https://www.linkedin.com/in/joweenflores/" label="LinkedIn">
             <LinkedInIcon className="h-4 w-4" />
           </FooterIcon>
           <FooterIcon href="https://github.com/jcf-dev" label="GitHub">
             <GitHubIcon className="h-4 w-4" />
+          </FooterIcon>
+          <FooterIcon href="https://www.upwork.com/freelancers/jcfdev" label="Upwork">
+            <UpworkIcon className="h-4 w-4" />
+          </FooterIcon>
+          <FooterIcon href="https://wa.me/639944860433" label="WhatsApp">
+            <WhatsAppIcon className="h-4 w-4" aria-hidden="true" />
+          </FooterIcon>
+          <FooterIcon href="https://t.me/jcfdev" label="Telegram">
+            <Send className="h-4 w-4" aria-hidden="true" />
           </FooterIcon>
         </div>
       </div>
@@ -83,14 +70,14 @@ function FooterIcon({
   children: React.ReactNode;
 }) {
   return (
-    <Link
+    <a
       href={href}
-      target={href.startsWith("mailto:") ? undefined : "_blank"}
-      rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-      className="text-muted-foreground transition-colors hover:text-foreground"
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+      className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={label}
     >
       {children}
-    </Link>
+    </a>
   );
 }
