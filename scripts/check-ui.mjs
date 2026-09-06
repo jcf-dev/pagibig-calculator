@@ -68,13 +68,7 @@ try {
     await page
       .getByRole("heading", { name: "Your goal", exact: true })
       .waitFor();
-    if (size.colorScheme === "light") {
-      await page
-        .getByRole("button", { name: "Toggle theme", exact: true })
-        .first()
-        .click();
-      await page.locator("html.light").waitFor();
-    }
+    await page.locator(`html.${size.colorScheme}`).waitFor();
     const layout = await page.evaluate(() => {
       const elements = [
         document.querySelector("h1"),
@@ -91,7 +85,7 @@ try {
           .querySelector("h1")
           .closest(".max-w-6xl")
           .getBoundingClientRect().width,
-        gradientButtons: [...document.querySelectorAll("button")]
+        gradientButtons: [...document.querySelectorAll("main button")]
           .filter(
             (element) => getComputedStyle(element).backgroundImage !== "none",
           )
