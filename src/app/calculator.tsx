@@ -1,4 +1,5 @@
 "use client";
+import { LabBreadcrumbs } from "@joween/site-shell/breadcrumbs";
 
 import { useEffect, useId, useMemo, useState, type ComponentProps, type ReactNode, type SetStateAction } from "react";
 import {
@@ -232,7 +233,8 @@ export function PagibigCalculator() {
     <TooltipProvider>
       <main className="min-h-screen bg-background">
         <section className="border-b bg-muted/30">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+            <LabBreadcrumbs />
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-4xl">

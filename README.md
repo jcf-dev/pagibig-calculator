@@ -34,7 +34,7 @@ Use your loan offer and statement as the source of your figures. Confirm terms w
 
 Use this app at `labs/pagibig-calculator` inside the `joween.dev` checkout.
 The site and calculator share `packages/site-shell`. The calculator imports its
-menu, footer, fonts, and theme. Run `pnpm install` after shared code changes.
+menu, footer, fonts, and theme. Run `pnpm update @joween/site-shell` after shared code changes.
 The shell uses the site's `theme` setting. Calculator inputs keep their own key.
 
 Compose supplies the shared package through the `site_shell` build context.
