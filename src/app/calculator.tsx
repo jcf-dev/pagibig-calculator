@@ -58,9 +58,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 import { defaultFinancing, defaultRefinance, defaultGuide, readStoredState, STORAGE_KEY, resolveRate, buildExtraRules, validateScenario, stepsFor, type FinancingState, type RefinanceState, type StoredState, type GuideState } from "@/lib/calculator-state";
 import { SimpleCalculator, EstimateNotes } from "@/components/calculator/simple-calculator";
+import { MplCalculator } from "@/components/calculator/mpl-calculator";
 import { activeSamples } from "@/lib/calculator-state";
 
 export function PagibigCalculator() {
+  const [product, setProduct] = useState<"housing" | "mpl">("housing");
   const [rates, setRates] = useState(DEFAULT_RATE_OPTIONS);
   const [loanCeiling, setLoanCeiling] = useState(DEFAULT_LOAN_CEILING);
   const [financing, storeFinancing] = useState(defaultFinancing);
@@ -220,7 +222,7 @@ export function PagibigCalculator() {
   }, [refinance, refinanceRate]);
 
   function resetAll() {
-    if (!window.confirm("Clear both loan estimates and start again?")) return;
+    if (!window.confirm("Clear both housing loan estimates and start again?")) return;
     setRates(DEFAULT_RATE_OPTIONS);
     setLoanCeiling(DEFAULT_LOAN_CEILING);
     storeFinancing(defaultFinancing);
@@ -238,11 +240,13 @@ export function PagibigCalculator() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-4xl">
-                  Pag-IBIG Housing Loan Calculator
+                  Pag-IBIG Loan Calculator
                 </h1>
                 <div className="h-[2px] w-32 bg-gradient-to-r from-brand-rose to-brand-blue" />
                 <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Understand your payments. Explore extra payments. Compare a new loan with the one you have.
+                  {product === "housing"
+                    ? "Understand housing loan payments, extra payments, and refinancing."
+                    : "Estimate your Multi-Purpose Loan amount and monthly payments."}
                 </p>
                 <p className="max-w-4xl text-xs italic leading-5 text-muted-foreground">
                   Estimates only. This is not financial advice, loan approval, or an official Pag-IBIG computation.
@@ -253,6 +257,11 @@ export function PagibigCalculator() {
         </section>
 
         <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div className="calculator-controls mb-6 grid w-full grid-cols-2 rounded-md border p-1 sm:w-[400px]" role="group" aria-label="Loan type">
+            <Button type="button" variant={product === "housing" ? "secondary" : "ghost"} aria-pressed={product === "housing"} className="min-w-0 px-2 text-xs sm:text-sm" onClick={() => setProduct("housing")}>Housing Loan</Button>
+            <Button type="button" variant={product === "mpl" ? "secondary" : "ghost"} aria-pressed={product === "mpl"} className="min-w-0 px-2 text-xs sm:text-sm" onClick={() => setProduct("mpl")}>Multi-Purpose Loan</Button>
+          </div>
+          {product === "housing" ? <>
           <div className="calculator-controls mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex rounded-lg border p-1" role="group" aria-label="Calculator mode">
               {(["simple", "advanced"] as const).map((mode) => <Button key={mode} variant={guide.mode === mode ? "secondary" : "ghost"} aria-pressed={guide.mode === mode} onClick={() => setGuide((g) => ({ ...g, mode, step: Math.min(g.step, stepsFor(g.task).length - 2) }))}>{mode === "simple" ? "Simple · step by step" : "Advanced"}</Button>)}
@@ -282,7 +291,7 @@ export function PagibigCalculator() {
               </TabsList>
               <Button variant="outline" onClick={resetAll} className="w-full sm:w-fit">
                 <RotateCcw />
-                Clear all inputs
+                Clear housing inputs
               </Button>
             </div>
 
@@ -437,6 +446,7 @@ export function PagibigCalculator() {
               </Card>
             </TabsContent>
           </Tabs>}
+          </> : <MplCalculator />}
         </div>
 
       </main>

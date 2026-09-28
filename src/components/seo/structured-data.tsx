@@ -4,12 +4,12 @@ export function StructuredData() {
   const data = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Pag-IBIG Housing Loan Calculator",
+    name: "Pag-IBIG Loan Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
     url: LAB_URL,
     description:
-      "Estimate Pag-IBIG housing loan payments, refinancing break-even, extra principal savings, future rate changes, interest-only periods, and loan costs.",
+      "Estimate Pag-IBIG housing loan payments, refinancing, and Multi-Purpose Loan amounts and monthly payments.",
     creator: {
       "@type": "Person",
       name: "Joween Flores",

@@ -43,6 +43,23 @@ async function loadExample() {
 }
 
 describe("guided calculator", () => {
+  it("switches to Multi-Purpose Loan and keeps housing inputs separate", async () => {
+    await start();
+    click("Multi-Purpose Loan");
+    await screen.findByLabelText("Regular Savings (TAV)");
+    expect(screen.getByRole("heading", { name: "Multi-Purpose Loan inputs" })).toBeTruthy();
+    change("Regular Savings (TAV)", "100000");
+    change("Existing short-term loan balance", "10000");
+    expect(screen.getByText("₱80,000.00")).toBeTruthy();
+    click("Use available amount");
+    expect(screen.getByRole("table", { name: "Multi-Purpose Loan term comparison" })).toBeTruthy();
+    expect(screen.getByText("Estimated monthly payment")).toBeTruthy();
+    click("Housing Loan");
+    expect(screen.getByRole("heading", { name: "Your goal" })).toBeTruthy();
+    click("Multi-Purpose Loan");
+    await waitFor(() => expect(screen.getByLabelText("Amount to borrow").getAttribute("value")).toBe("80,000"));
+  });
+
   it("requires valid inputs and does not show results before review", async () => {
     await start();
     click("Start my estimate");

@@ -1,6 +1,6 @@
-# Pag-IBIG Housing Loan Calculator
+# Pag-IBIG Loan Calculator
 
-A loan planning tool at `/labs/pagibig-calculator`.
+A housing and Multi-Purpose Loan planning tool at `/labs/pagibig-calculator`.
 
 ## Use the calculator
 
@@ -15,6 +15,8 @@ Both paths support monthly, yearly, and one-time extra payments. The model can s
 Use **Try an example** if you do not have your figures. Sample fields remain marked in the review, results, printout, and CSV export.
 
 Advanced mode keeps the complete calculator, including future rates, costs, interest-only periods, custom payment ranges, and solving for a term or rate. Both modes share values. Simple mode shows active Advanced settings and links back to edit them.
+
+Choose **Multi-Purpose Loan** to estimate the savings-based amount available and compare 12-, 24-, and 36-month payments. Enter your Pag-IBIG Regular Savings (TAV), existing short-term loan balance, and desired loan amount. The model uses the published 90% savings limit, a 1.4583% monthly equivalent declining-balance rate, and an assumed two months of simple grace interest. It does not determine eligibility or capacity to pay, and actual Pag-IBIG calculations may differ.
 
 Money fields show the peso mark on the left and group thousands with commas. Result graphs and payment schedules can open in a large view. Monthly, Annual, and Payments clearly mark their short page view as a preview. Use **View full schedule** to see every row. Phone previews use cards. Wider screens use a small key-column table with whole-peso values. The large view keeps all columns and cents.
 
@@ -72,6 +74,6 @@ node scripts/check-report-ui.mjs
 
 Set `CALCULATOR_TEST_URL` to check another local address. Chrome must be installed.
 
-Input data, mode, progress, and sample labels use `pagibig-calculator:v1` in local browser storage. Old saved inputs remain supported. Missing fee treatment means financed fees. Reloading a completed guide returns to review. Storage failure leaves the calculator usable in memory.
+Housing input data, mode, progress, and sample labels use `pagibig-calculator:v1` in local browser storage. MPL inputs use `pagibig-calculator:mpl:v1`. Old saved housing inputs remain supported. Missing fee treatment means financed fees. Reloading a completed guide returns to review. Storage failure leaves the calculator usable in memory.
 
 The parent `joween.dev` repo owns deployment, routing, availability fallback, robots, and sitemap. Validate this app before pinning its commit in the parent. Follow the parent's `docs/labs.md` for release checks.

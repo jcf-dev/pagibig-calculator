@@ -1,6 +1,6 @@
 ---
-name: Pag-IBIG Housing Loan Calculator
-description: A clear loan form with shared Simple and Advanced views.
+name: Pag-IBIG Loan Calculator
+description: Clear housing loan and Multi-Purpose Loan forms.
 colors:
   background: "oklch(1 0 0)"
   foreground: "oklch(0.145 0 0)"
@@ -124,7 +124,7 @@ components:
     padding: "1rem"
 ---
 
-# Design System: Pag-IBIG Housing Loan Calculator
+# Design System: Pag-IBIG Loan Calculator
 
 ## Overview
 
