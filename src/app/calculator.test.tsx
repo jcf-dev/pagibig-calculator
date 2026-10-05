@@ -43,6 +43,57 @@ async function loadExample() {
 }
 
 describe("guided calculator", () => {
+  it("switches to Multi-Purpose Loan and keeps housing inputs separate", async () => {
+    await start();
+    click("Multi-Purpose Loan");
+    await screen.findByLabelText("Regular Savings balance");
+    expect(screen.getByRole("heading", { name: "Multi-Purpose Loan inputs" })).toBeTruthy();
+    change("Regular Savings balance", "100000");
+    change("Existing short-term loan balance", "10000");
+    expect(screen.getByText("₱80,000.00")).toBeTruthy();
+    click("Use available amount");
+    expect(screen.getByRole("table", { name: "Multi-Purpose Loan term comparison" })).toBeTruthy();
+    expect(screen.getByText("Estimated monthly payment")).toBeTruthy();
+    click("Housing Loan");
+    expect(screen.getByRole("heading", { name: "Your goal" })).toBeTruthy();
+    click("Multi-Purpose Loan");
+    await waitFor(() => expect(screen.getByLabelText("Amount to borrow").getAttribute("value")).toBe("80,000"));
+  });
+
+  it("shows MPL errors beside the input and marks the selected term", async () => {
+    await start();
+    click("Multi-Purpose Loan");
+    await screen.findByLabelText("Regular Savings balance");
+    change("Regular Savings balance", "-100");
+    const savings = screen.getByLabelText("Regular Savings balance");
+    expect(savings.getAttribute("aria-invalid")).toBe("true");
+    expect(document.getElementById(savings.getAttribute("aria-describedby")!.split(" ")[1])?.textContent).toContain("zero or more");
+    change("Regular Savings balance", "100000");
+    change("Amount to borrow", "100000");
+    const amount = screen.getByLabelText("Amount to borrow");
+    expect(amount.getAttribute("aria-invalid")).toBe("true");
+    expect(document.getElementById(amount.getAttribute("aria-describedby")!.split(" ")[1])?.textContent).toContain("₱90,000.00 or less");
+    change("Amount to borrow", "90000");
+    expect(screen.getByRole("row", { name: /Selected: 24 months/ })).toBeTruthy();
+    expect(screen.getByText("Estimated monthly payment")).toBeTruthy();
+  });
+
+  it("keeps untouched advanced results neutral and puts review values first", async () => {
+    await start();
+    click("Advanced");
+    expect(screen.getByText("Enter a loan amount to see your estimate.")).toBeTruthy();
+    expect(screen.queryByText("Calculation needs attention")).toBeNull();
+    expect(screen.getByText("Estimate assumptions")).toBeTruthy();
+    click("Simple · step by step");
+    click("Try an example");
+    click("Next");
+    click("Next");
+    click("Next");
+    const firstValue = screen.getByText("Loan details");
+    const notes = screen.getByText(/This estimate keeps the entered rate/);
+    expect(firstValue.compareDocumentPosition(notes) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("requires valid inputs and does not show results before review", async () => {
     await start();
     click("Start my estimate");

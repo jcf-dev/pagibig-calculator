@@ -58,9 +58,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 import { defaultFinancing, defaultRefinance, defaultGuide, readStoredState, STORAGE_KEY, resolveRate, buildExtraRules, validateScenario, stepsFor, type FinancingState, type RefinanceState, type StoredState, type GuideState } from "@/lib/calculator-state";
 import { SimpleCalculator, EstimateNotes } from "@/components/calculator/simple-calculator";
+import { MplCalculator } from "@/components/calculator/mpl-calculator";
 import { activeSamples } from "@/lib/calculator-state";
 
 export function PagibigCalculator() {
+  const [product, setProduct] = useState<"housing" | "mpl">("housing");
   const [rates, setRates] = useState(DEFAULT_RATE_OPTIONS);
   const [loanCeiling, setLoanCeiling] = useState(DEFAULT_LOAN_CEILING);
   const [financing, storeFinancing] = useState(defaultFinancing);
@@ -220,7 +222,7 @@ export function PagibigCalculator() {
   }, [refinance, refinanceRate]);
 
   function resetAll() {
-    if (!window.confirm("Clear both loan estimates and start again?")) return;
+    if (!window.confirm("Clear both housing loan estimates and start again?")) return;
     setRates(DEFAULT_RATE_OPTIONS);
     setLoanCeiling(DEFAULT_LOAN_CEILING);
     storeFinancing(defaultFinancing);
@@ -238,11 +240,13 @@ export function PagibigCalculator() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-4xl">
-                  Pag-IBIG Housing Loan Calculator
+                  Pag-IBIG Loan Calculator
                 </h1>
                 <div className="h-[2px] w-32 bg-gradient-to-r from-brand-rose to-brand-blue" />
                 <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Understand your payments. Explore extra payments. Compare a new loan with the one you have.
+                  {product === "housing"
+                    ? "Understand housing loan payments, extra payments, and refinancing."
+                    : "Estimate your Multi-Purpose Loan amount and monthly payments."}
                 </p>
                 <p className="max-w-4xl text-xs italic leading-5 text-muted-foreground">
                   Estimates only. This is not financial advice, loan approval, or an official Pag-IBIG computation.
@@ -253,6 +257,11 @@ export function PagibigCalculator() {
         </section>
 
         <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div className="calculator-controls mb-6 grid w-full grid-cols-2 rounded-md border p-1 sm:w-[400px]" role="group" aria-label="Loan type">
+            <Button type="button" variant={product === "housing" ? "secondary" : "ghost"} aria-pressed={product === "housing"} className="min-w-0 px-2 text-xs sm:text-sm" onClick={() => setProduct("housing")}>Housing Loan</Button>
+            <Button type="button" variant={product === "mpl" ? "secondary" : "ghost"} aria-pressed={product === "mpl"} className="min-w-0 px-2 text-xs sm:text-sm" onClick={() => setProduct("mpl")}>Multi-Purpose Loan</Button>
+          </div>
+          {product === "housing" ? <>
           <div className="calculator-controls mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex rounded-lg border p-1" role="group" aria-label="Calculator mode">
               {(["simple", "advanced"] as const).map((mode) => <Button key={mode} variant={guide.mode === mode ? "secondary" : "ghost"} aria-pressed={guide.mode === mode} onClick={() => setGuide((g) => ({ ...g, mode, step: Math.min(g.step, stepsFor(g.task).length - 2) }))}>{mode === "simple" ? "Simple · step by step" : "Advanced"}</Button>)}
@@ -282,7 +291,7 @@ export function PagibigCalculator() {
               </TabsList>
               <Button variant="outline" onClick={resetAll} className="w-full sm:w-fit">
                 <RotateCcw />
-                Clear all inputs
+                Clear housing inputs
               </Button>
             </div>
 
@@ -341,6 +350,8 @@ export function PagibigCalculator() {
                   result={financingResult}
                   baseline={baseFinancingResult}
                   title="Financing estimate"
+                  empty={financing.solveTarget === "principal" ? !Number.isFinite(financing.targetPayment) : !Number.isFinite(financing.principal)}
+                  emptyMessage={financing.solveTarget === "principal" ? "Enter a monthly loan budget to see your estimate." : "Enter a loan amount to see your estimate."}
                   onExport={() => exportCsv("pagibig-financing.csv", financingResult.data?.rows ?? [], reportNotes("financing"))}
                   canRenderChart={hydrated}
                   scheduleView={financing.scheduleView}
@@ -389,6 +400,7 @@ export function PagibigCalculator() {
 
                 <RefinancePanel
                   comparison={refinanceComparison}
+                  empty={!Number.isFinite(refinance.currentBalance)}
                   onExport={() => exportCsv("pagibig-refinance.csv", refinanceComparison.data?.refinance.rows ?? [], reportNotes("refinance"))}
                   canRenderChart={hydrated}
                   scheduleView={refinance.scheduleView}
@@ -437,6 +449,7 @@ export function PagibigCalculator() {
               </Card>
             </TabsContent>
           </Tabs>}
+          </> : <MplCalculator />}
         </div>
 
       </main>
@@ -466,19 +479,14 @@ export function PagibigCalculator() {
 
 function AdvancedEstimateNotes(props: ComponentProps<typeof EstimateNotes>) {
   return (
-    <>
-      <div className="hidden sm:block">
+    <details className="mb-4 rounded-md border px-4">
+      <summary className="calculator-controls flex min-h-11 cursor-pointer items-center font-medium">
+        Estimate assumptions
+      </summary>
+      <div className="pb-4 [&_.estimate-notes]:mb-0 [&_.estimate-notes]:border-0 [&_.estimate-notes]:bg-transparent [&_.estimate-notes]:p-0">
         <EstimateNotes {...props} />
       </div>
-      <details className="mb-4 rounded-lg border p-3 sm:hidden">
-        <summary className="calculator-controls flex min-h-11 cursor-pointer items-center font-medium">
-          Estimate assumptions
-        </summary>
-        <div className="pt-3 [&_.estimate-notes]:mb-0 [&_.estimate-notes]:border-0 [&_.estimate-notes]:bg-transparent [&_.estimate-notes]:p-0">
-          <EstimateNotes {...props} />
-        </div>
-      </details>
-    </>
+    </details>
   );
 }
 
@@ -966,6 +974,8 @@ function ResultPanel({
   result,
   baseline,
   title,
+  empty = false,
+  emptyMessage = "Enter your loan details to see an estimate.",
   onExport,
   canRenderChart,
   scheduleView,
@@ -974,12 +984,15 @@ function ResultPanel({
   result: ReturnType<typeof useMemo<{ error: string; data: ReturnType<typeof calculateAmortization> | null }>>;
   baseline: ReturnType<typeof calculateAmortization> | null;
   title: string;
+  empty?: boolean;
+  emptyMessage?: string;
   onExport: () => void;
   canRenderChart: boolean;
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
   const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
+  if (empty) return <ResultPlaceholder message={emptyMessage} />;
   if (result.error || !result.data) return <ErrorCard message={result.error} />;
   const data = result.data;
   const chartData = data.rows.filter((_, index) => index % 12 === 0 || index === data.rows.length - 1).map((row) => ({
@@ -1079,18 +1092,21 @@ function ResultPanel({
 
 function RefinancePanel({
   comparison,
+  empty = false,
   onExport,
   canRenderChart,
   scheduleView,
   onScheduleViewChange,
 }: {
   comparison: { error: string; data: ReturnType<typeof compareRefinance> | null };
+  empty?: boolean;
   onExport: () => void;
   canRenderChart: boolean;
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
   const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
+  if (empty) return <ResultPlaceholder message="Enter your current loan balance to start the comparison." />;
   if (comparison.error || !comparison.data) return <ErrorCard message={comparison.error} />;
   const data = comparison.data;
   const chartData = Array.from({ length: Math.max(data.current.rows.length, data.refinance.rows.length) }, (_, index) => ({
@@ -1622,6 +1638,14 @@ function ErrorCard({ message }: { message: string }) {
         <CardDescription>{message}</CardDescription>
       </CardHeader>
     </Card>
+  );
+}
+
+function ResultPlaceholder({ message }: { message: string }) {
+  return (
+    <div className="rounded-md border bg-muted/20 p-5 text-sm text-muted-foreground" role="status">
+      {message}
+    </div>
   );
 }
 

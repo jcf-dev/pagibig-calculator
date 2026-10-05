@@ -8,19 +8,20 @@ import "./globals.css";
 
 const siteUrl = new URL(SITE_ORIGIN);
 const siteDescription =
-  "Estimate Pag-IBIG housing loan payments, refinancing break-even, extra principal savings, future rate changes, interest-only periods, and loan costs.";
+  "Estimate Pag-IBIG housing loan payments, refinancing, and Multi-Purpose Loan amounts and monthly payments.";
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  applicationName: "Pag-IBIG Housing Loan Calculator",
+  applicationName: "Pag-IBIG Loan Calculator",
   title: {
-    default: "Pag-IBIG Housing Loan Calculator",
-    template: "%s | Pag-IBIG Housing Loan Calculator",
+    default: "Pag-IBIG Loan Calculator",
+    template: "%s | Pag-IBIG Loan Calculator",
   },
   description: siteDescription,
   keywords: [
     "Pag-IBIG calculator",
     "Pag-IBIG housing loan",
+    "Pag-IBIG Multi-Purpose Loan calculator",
     "Philippines mortgage calculator",
     "home loan calculator",
     "refinance calculator",
@@ -35,16 +36,16 @@ export const metadata: Metadata = {
     canonical: LAB_BASE_PATH,
   },
   openGraph: {
-    title: "Pag-IBIG Housing Loan Calculator",
+    title: "Pag-IBIG Loan Calculator",
     description: siteDescription,
     url: LAB_BASE_PATH,
-    siteName: "Pag-IBIG Housing Loan Calculator",
+    siteName: "Pag-IBIG Loan Calculator",
     locale: "en_PH",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Pag-IBIG Housing Loan Calculator",
+    title: "Pag-IBIG Loan Calculator",
     description: siteDescription,
   },
   robots: {
