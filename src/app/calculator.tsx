@@ -350,6 +350,8 @@ export function PagibigCalculator() {
                   result={financingResult}
                   baseline={baseFinancingResult}
                   title="Financing estimate"
+                  empty={financing.solveTarget === "principal" ? !Number.isFinite(financing.targetPayment) : !Number.isFinite(financing.principal)}
+                  emptyMessage={financing.solveTarget === "principal" ? "Enter a monthly loan budget to see your estimate." : "Enter a loan amount to see your estimate."}
                   onExport={() => exportCsv("pagibig-financing.csv", financingResult.data?.rows ?? [], reportNotes("financing"))}
                   canRenderChart={hydrated}
                   scheduleView={financing.scheduleView}
@@ -398,6 +400,7 @@ export function PagibigCalculator() {
 
                 <RefinancePanel
                   comparison={refinanceComparison}
+                  empty={!Number.isFinite(refinance.currentBalance)}
                   onExport={() => exportCsv("pagibig-refinance.csv", refinanceComparison.data?.refinance.rows ?? [], reportNotes("refinance"))}
                   canRenderChart={hydrated}
                   scheduleView={refinance.scheduleView}
@@ -476,19 +479,14 @@ export function PagibigCalculator() {
 
 function AdvancedEstimateNotes(props: ComponentProps<typeof EstimateNotes>) {
   return (
-    <>
-      <div className="hidden sm:block">
+    <details className="mb-4 rounded-md border px-4">
+      <summary className="calculator-controls flex min-h-11 cursor-pointer items-center font-medium">
+        Estimate assumptions
+      </summary>
+      <div className="pb-4 [&_.estimate-notes]:mb-0 [&_.estimate-notes]:border-0 [&_.estimate-notes]:bg-transparent [&_.estimate-notes]:p-0">
         <EstimateNotes {...props} />
       </div>
-      <details className="mb-4 rounded-lg border p-3 sm:hidden">
-        <summary className="calculator-controls flex min-h-11 cursor-pointer items-center font-medium">
-          Estimate assumptions
-        </summary>
-        <div className="pt-3 [&_.estimate-notes]:mb-0 [&_.estimate-notes]:border-0 [&_.estimate-notes]:bg-transparent [&_.estimate-notes]:p-0">
-          <EstimateNotes {...props} />
-        </div>
-      </details>
-    </>
+    </details>
   );
 }
 
@@ -976,6 +974,8 @@ function ResultPanel({
   result,
   baseline,
   title,
+  empty = false,
+  emptyMessage = "Enter your loan details to see an estimate.",
   onExport,
   canRenderChart,
   scheduleView,
@@ -984,12 +984,15 @@ function ResultPanel({
   result: ReturnType<typeof useMemo<{ error: string; data: ReturnType<typeof calculateAmortization> | null }>>;
   baseline: ReturnType<typeof calculateAmortization> | null;
   title: string;
+  empty?: boolean;
+  emptyMessage?: string;
   onExport: () => void;
   canRenderChart: boolean;
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
   const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
+  if (empty) return <ResultPlaceholder message={emptyMessage} />;
   if (result.error || !result.data) return <ErrorCard message={result.error} />;
   const data = result.data;
   const chartData = data.rows.filter((_, index) => index % 12 === 0 || index === data.rows.length - 1).map((row) => ({
@@ -1089,18 +1092,21 @@ function ResultPanel({
 
 function RefinancePanel({
   comparison,
+  empty = false,
   onExport,
   canRenderChart,
   scheduleView,
   onScheduleViewChange,
 }: {
   comparison: { error: string; data: ReturnType<typeof compareRefinance> | null };
+  empty?: boolean;
   onExport: () => void;
   canRenderChart: boolean;
   scheduleView: "monthly" | "annual" | "payments";
   onScheduleViewChange: (view: "monthly" | "annual" | "payments") => void;
 }) {
   const [expandedView, setExpandedView] = useState<"graph" | "schedule" | null>(null);
+  if (empty) return <ResultPlaceholder message="Enter your current loan balance to start the comparison." />;
   if (comparison.error || !comparison.data) return <ErrorCard message={comparison.error} />;
   const data = comparison.data;
   const chartData = Array.from({ length: Math.max(data.current.rows.length, data.refinance.rows.length) }, (_, index) => ({
@@ -1632,6 +1638,14 @@ function ErrorCard({ message }: { message: string }) {
         <CardDescription>{message}</CardDescription>
       </CardHeader>
     </Card>
+  );
+}
+
+function ResultPlaceholder({ message }: { message: string }) {
+  return (
+    <div className="rounded-md border bg-muted/20 p-5 text-sm text-muted-foreground" role="status">
+      {message}
+    </div>
   );
 }
 

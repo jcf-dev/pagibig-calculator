@@ -69,6 +69,17 @@ export function MplCalculator() {
     try { return { estimate: calculateMplEstimate(inputs), error: "" }; }
     catch (error) { return { estimate: null, error: error instanceof Error ? error.message : "Unable to calculate." }; }
   }, [available, inputs]);
+  const savingsError = Number.isFinite(inputs.regularSavings) && inputs.regularSavings < 0
+    ? "Enter zero or more for your Regular Savings balance." : "";
+  const balanceError = Number.isFinite(inputs.existingShortTermBalance) && inputs.existingShortTermBalance < 0
+    ? "Enter zero or more for your existing loan balance." : "";
+  const amountError = Number.isFinite(inputs.requestedAmount)
+    ? inputs.requestedAmount <= 0
+      ? "Enter an amount greater than zero."
+      : available !== null && inputs.requestedAmount > available
+        ? `Enter ${formatPeso(available)} or less based on your savings.`
+        : ""
+    : "";
 
   function update<K extends keyof MplInputs>(key: K, value: MplInputs[K]) {
     setInputs((current) => ({ ...current, [key]: value }));
@@ -86,8 +97,8 @@ export function MplCalculator() {
           <p className="mt-1 text-sm text-muted-foreground">Use your latest Pag-IBIG Regular Savings balance.</p>
         </div>
 
-        <MoneyInput label="Regular Savings (TAV)" help="Include your contributions, employer contributions, and dividends. Do not include MP2 savings." value={inputs.regularSavings} onChange={(value) => update("regularSavings", value)} />
-        <MoneyInput label="Existing short-term loan balance" help="Enter other Pag-IBIG short-term loans using the same savings entitlement. Leave at zero if none. MPL renewal settlement is not modeled here." value={inputs.existingShortTermBalance} onChange={(value) => update("existingShortTermBalance", value)} />
+        <MoneyInput label="Regular Savings balance" help="Also called Total Accumulated Value (TAV). Include your contributions, employer contributions, and dividends, but not MP2 savings." value={inputs.regularSavings} error={savingsError} onChange={(value) => update("regularSavings", value)} />
+        <MoneyInput label="Existing short-term loan balance" help="Enter other Pag-IBIG short-term loans using the same savings entitlement. Leave at zero if none. If renewing an MPL, any deduction to settle the old loan is not included." value={inputs.existingShortTermBalance} error={balanceError} onChange={(value) => update("existingShortTermBalance", value)} />
 
         <div className="border-y py-4" aria-live="polite">
           <p className="text-sm text-muted-foreground">Estimated available from savings</p>
@@ -96,7 +107,7 @@ export function MplCalculator() {
         </div>
 
         <div className="space-y-2">
-          <MoneyInput label="Amount to borrow" help="Enter the amount you want to request. This cannot exceed the savings-based estimate above." value={inputs.requestedAmount} onChange={(value) => update("requestedAmount", value)} invalid={Boolean(result.error)} />
+          <MoneyInput label="Amount to borrow" help="Enter the amount you want to request. This cannot exceed the savings-based estimate above." value={inputs.requestedAmount} error={amountError} onChange={(value) => update("requestedAmount", value)} />
           {available !== null && available > 0 && (
             <Button type="button" variant="outline" size="sm" onClick={() => update("requestedAmount", available)}>
               Use available amount
@@ -127,15 +138,15 @@ export function MplCalculator() {
           <p className="mt-1 text-sm text-muted-foreground">Based on the amount and term you choose.</p>
         </div>
 
-        {result.error ? (
+        {result.error && !amountError ? (
           <p role="alert" className="rounded-md border border-destructive p-4 text-sm text-destructive">{result.error}</p>
         ) : !result.estimate ? (
-          <p className="rounded-md border p-5 text-sm text-muted-foreground">Enter your Regular Savings and an amount to borrow to see the estimate.</p>
+          <p className="rounded-md border p-5 text-sm text-muted-foreground">{savingsError || balanceError || amountError ? "Correct the highlighted input to see your estimate." : "Enter your Regular Savings and an amount to borrow to see the estimate."}</p>
         ) : (
           <>
-            <div aria-live="polite" className="border-b pb-6">
+            <div aria-live="polite" className="border-b border-t-2 border-t-brand-blue bg-brand-blue/5 px-4 py-5">
               <p className="text-sm text-muted-foreground">Estimated monthly payment</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums sm:text-4xl">{formatPeso(result.estimate.monthlyPayment)}</p>
+              <p className="mt-1 text-3xl font-semibold leading-tight tabular-nums [overflow-wrap:anywhere] sm:text-4xl">{formatPeso(result.estimate.monthlyPayment)}</p>
               <p className="mt-2 text-sm text-muted-foreground">{inputs.termMonths} monthly payments, starting after the assumed two-month grace period.</p>
             </div>
             <dl className="grid gap-4 sm:grid-cols-2">
@@ -150,7 +161,8 @@ export function MplCalculator() {
                   <tbody>
                     {MPL_TERMS.map((months) => {
                       const estimate = calculateMplEstimate({ ...inputs, termMonths: months });
-                      return <tr key={months} className="border-b last:border-0"><th className="py-3 text-left font-medium">{months} months</th><td className="py-3 text-right tabular-nums">{formatPeso(estimate.monthlyPayment)}</td><td className="py-3 text-right tabular-nums">{formatPeso(estimate.totalInterest)}</td></tr>;
+                      const selected = months === inputs.termMonths;
+                      return <tr key={months} className={`border-b last:border-0 ${selected ? "bg-brand-blue/10 font-semibold" : ""}`}><th className="py-3 text-left font-medium" aria-label={selected ? `Selected: ${months} months` : undefined}>{months} months</th><td className="py-3 text-right tabular-nums">{formatPeso(estimate.monthlyPayment)}</td><td className="py-3 text-right tabular-nums">{formatPeso(estimate.totalInterest)}</td></tr>;
                     })}
                   </tbody>
                 </table>
@@ -170,12 +182,12 @@ export function MplCalculator() {
   );
 }
 
-function MoneyInput({ label, help, value, onChange, invalid = false }: {
+function MoneyInput({ label, help, value, onChange, error = "" }: {
   label: string;
   help: string;
   value: number;
   onChange: (value: number) => void;
-  invalid?: boolean;
+  error?: string;
 }) {
   const id = useId();
   return (
@@ -183,9 +195,10 @@ function MoneyInput({ label, help, value, onChange, invalid = false }: {
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">₱</span>
-        <Input id={id} inputMode="decimal" className="pl-9 tabular-nums" value={formatMoneyInput(value)} aria-invalid={invalid || (Number.isFinite(value) && value < 0)} onChange={(event) => onChange(parseMoneyInput(event.target.value))} />
+        <Input id={id} inputMode="decimal" className="pl-9 tabular-nums" value={formatMoneyInput(value)} aria-invalid={Boolean(error)} aria-describedby={`${id}-help${error ? ` ${id}-error` : ""}`} onChange={(event) => onChange(parseMoneyInput(event.target.value))} />
       </div>
-      <p className="text-xs leading-5 text-muted-foreground">{help}</p>
+      <p id={`${id}-help`} className="text-xs leading-5 text-muted-foreground">{help}</p>
+      {error && <p id={`${id}-error`} className="text-sm text-destructive" aria-live="polite">{error}</p>}
     </div>
   );
 }

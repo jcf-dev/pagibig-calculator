@@ -594,21 +594,16 @@ export function SimpleCalculator(props: Props) {
 
             {(isReview || isResult) && (
               <>
-                {isReview && (
-                  <EstimateNotes
-                    task={task}
-                    financing={financing}
-                    refinance={refinance}
-                    rates={rates}
-                    samples={guide.samples}
-                  />
-                )}
                 {isResult && sampleKeys.length > 0 && (
                   <p className="rounded-lg border bg-muted/25 p-3 text-sm font-medium">
                     Example estimate · Contains sample values.
                   </p>
                 )}
                 {isReview && (
+                  <>
+                  {sampleKeys.length > 0 && (
+                    <p className="text-sm text-muted-foreground">Example values are marked below. Replace them before relying on this estimate.</p>
+                  )}
                   <div className="divide-y border-y">
                     {groups.slice(1).map((group, index) => (
                       <section key={index} className="py-5">
@@ -673,6 +668,17 @@ export function SimpleCalculator(props: Props) {
                       </section>
                     ))}
                   </div>
+                  <div className="mt-5">
+                    <EstimateNotes
+                      task={task}
+                      financing={financing}
+                      refinance={refinance}
+                      rates={rates}
+                      samples={guide.samples}
+                      showExampleNotice={false}
+                    />
+                  </div>
+                  </>
                 )}
                 {isResult && (
                   <>
@@ -1034,9 +1040,11 @@ export function EstimateNotes({
   refinance,
   rates,
   samples,
+  showExampleNotice = true,
 }: Pick<Props, "financing" | "refinance" | "rates"> & {
   task: Task;
   samples: string[];
+  showExampleNotice?: boolean;
 }) {
   const state = task === "financing" ? financing : refinance;
   const periods =
@@ -1050,7 +1058,7 @@ export function EstimateNotes({
   );
   return (
     <div className="estimate-notes mb-5 space-y-2 rounded-lg border bg-muted/25 p-4 text-sm leading-6">
-      {example && (
+      {example && showExampleNotice && (
         <p className="font-medium">
           Example estimate · Some inputs are sample values. Replace them before
           using this result for your own loan.
